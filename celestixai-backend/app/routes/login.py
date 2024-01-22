@@ -14,8 +14,8 @@ router = APIRouter(
 
 
 @router.post("/")
-def login(user_login: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.email == user_login.username).first()
+async def login(user_login: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session = Depends(get_db)):
+    db_user = await db.query(User).filter(User.email == user_login.username).first()
 
     if not db_user or not verify_password(user_login.password, db_user.hashed_password):
         raise HTTPException(
