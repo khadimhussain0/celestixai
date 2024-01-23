@@ -11,7 +11,15 @@
       </div>
       <div class="content-container">
         <div v-if="activeTab === 0">Dashboard Content</div>
-        <div v-if="activeTab === 1">Text Corpus Content</div>
+        <div v-if="activeTab === 1">Text Corpus Content
+              <!-- Floating Upload Button -->
+              <div class="floating-upload-button" @click="openFileUploader">
+                  <span>+</span>
+              </div>
+
+                <!-- Hidden file input to trigger file selection -->
+                <input type="file" ref="fileInput" style="display: none" @change="handleFileUpload" />
+        </div>
         <div v-if="activeTab === 2">
           <!-- Render model cards for LLM Constellation -->
           <div v-for="model in modelData" :key="model.id" class="model-card">
@@ -60,6 +68,7 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 export default {
   data() {
@@ -72,7 +81,48 @@ export default {
       modelData: [],
     };
   },
-  methods: {
+  methods: {openFileUploader() {
+      // Trigger click on the hidden file input
+      this.$refs.fileInput.click();
+    },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+
+      // You can now send the file to an API endpoint
+      // For simplicity, let's assume there's a function sendFileToApi(file) for this purpose
+      this.sendFileToApi(file);
+    },
+    sendFileToApi(file) {
+      // Implement your logic to send the file to the API endpoint
+      // For example, you can use the Fetch API or any library like Axios
+      // Here's a simple example using Fetch API (replace with your actual API endpoint)
+      const apiUrl = 'http://127.0.0.1:8000/dataset/';
+
+      fetch(apiUrl, {
+        method: 'POST',
+        body: file,
+      })
+        .then(response => response.json())
+        .then(data => {
+          // Handle the API response as needed
+          this.showToast('Dataset uploaded successfully!', 'success');
+          console.log('File uploaded successfully:', data);
+        })
+        .catch(error => {
+          // Handle errors
+          this.showToast('Failed to upload dataset. Please try again.', 'error');
+          console.error('Error uploading file:', error);
+        });
+    },
+    showToast(message, type) {
+      const toast = useToast();
+      toast[type](message, {
+        position: 'top-right',
+        timeout: 3000, // Duration in milliseconds
+        closeOnClick: true,
+        pauseOnHover: true,
+      });
+    },
     async login() {
       try {
         const params = new URLSearchParams();
@@ -107,6 +157,11 @@ export default {
 
       // Fetch LLM Constellation data when the tab is clicked
       if (index === 3 && this.isLoggedIn) {
+        this.modelData=[]
+        this.fetchModelData();
+      }
+      if (index === 2 && this.isLoggedIn) {
+        this.modelData=[]
         this.fetchModelData();
       }
     },
@@ -149,10 +204,27 @@ export default {
       this.isLoggedIn = true;
     }
   },
+  
 };
 </script>
 
 <style scoped>
+.floating-upload-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #4CAF50;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+.floating-upload-button:hover {
+  background-color: #45a049;
+}
 .main-container {
   display: flex;
   height: 100vh;
