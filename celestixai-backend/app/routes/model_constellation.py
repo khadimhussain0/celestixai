@@ -16,7 +16,7 @@ router = APIRouter(
 
 
 @router.post("/", response_model=ModelConstellationRead)
-async def create_model(
+def create_model(
     model_metadata: ModelConstellationCreate = Depends(ModelConstellationCreate.as_form),
     model_file: UploadFile = File(...),
     icon_file: UploadFile = File(...),
@@ -28,10 +28,10 @@ async def create_model(
     model_path = os.path.join(FILE_STORAGE_PATH, model_file.filename + "." + model_uuid)
     icon_path = os.path.join(FILE_STORAGE_PATH, icon_file.filename + "." + icon_uuid)
 
-    async with open(model_path, "wb") as f:
-        await f.write(model_file.file.read())
-    async with open(icon_path, "wb") as f:
-        await f.write(icon_file.file.read())
+    with open(model_path, "wb") as f:
+        f.write(model_file.file.read())
+    with open(icon_path, "wb") as f:
+        f.write(icon_file.file.read())
 
     model_db = ModelConstellation(
         uuid=model_uuid,
@@ -45,15 +45,15 @@ async def create_model(
         model_task=model_metadata.model_task,
     )
     db.add(model_db)
-    await db.commit()
-    await db.refresh(model_db)
+    db.commit()
+    db.refresh(model_db)
 
     return model_db
 
 
 @router.get("/", response_model=List[ModelConstellationRead])
-async def get_model_constellation(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    models_constellation = await db.query(ModelConstellation).all()
+def get_model_constellation(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    models_constellation = db.query(ModelConstellation).all()
 
     if len(models_constellation) == 0:
         raise HTTPException(status_code=404, detail="Model not found")
