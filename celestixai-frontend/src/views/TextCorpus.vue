@@ -20,26 +20,19 @@ export default {
   },
   methods: {
     openFileUploader() {
-      // Trigger click on the hidden file input
       this.$refs.fileInput.click();
     },
     handleFileUpload(event) {
       const file = event.target.files[0];
-
-      // You can now send the file to an API endpoint
-      // For simplicity, let's assume there's a function sendFileToApi(file) for this purpose
       this.sendFileToApi(file);
     },
     sendFileToApi(file) {
-      // Implement your logic to send the file to the API endpoint
-      // For example, you can use the Fetch API or any library like Axios
-      // Here's a simple example using Fetch API (replace with your actual API endpoint)
       const accessToken = localStorage.getItem('accessToken');
       const apiUrl = 'http://127.0.0.1:8000/dataset/';
 
       const formData = new FormData();
 
-      formData.append('dataset', file, 'file.jpg'); // Adjust the field name and filename as needed
+      formData.append('dataset', file, 'file.jpg');
 
       axios.post(apiUrl, formData, {
         headers: {
@@ -50,12 +43,10 @@ export default {
       })
         .then(response => response.json())
         .then(data => {
-          // Handle the API response as needed
           this.showToast('Dataset uploaded successfully!', 'success');
           console.log('File uploaded successfully:', data);
         })
         .catch(error => {
-          // Handle errors
           this.showToast('Failed to upload dataset. Please try again.', 'error');
           console.error('Error uploading file:', error);
         });
@@ -64,14 +55,13 @@ export default {
       const toast = useToast();
       toast[type](message, {
         position: 'top-right',
-        timeout: 3000, // Duration in milliseconds
+        timeout: 3000,
         closeOnClick: true,
         pauseOnHover: true,
       });
     },
   },
   mounted() {
-    // Check if the user is already logged in (e.g., token exists in local storage)
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
       this.isLoggedIn = true;
