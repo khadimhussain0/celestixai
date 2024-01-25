@@ -56,28 +56,15 @@ export default {
   methods: {
     changeTab(index) {
       this.activeTab = index;
-
-      // Fetch LLM Constellation data when the tab is clicked
-      if (index === 3 && this.isLoggedIn) {
-        this.modelData=[]
-        this.fetchModelData();
-      }
-      if (index === 2 && this.isLoggedIn) {
-        this.modelData=[]
-        this.fetchModelData();
-      }
     },
     logout() {
       // Clear the token from local storage or cookie
         localStorage.removeItem('accessToken');
-
-      // Set isLoggedIn to false to show the login form
         this.isLoggedIn = false;
         this.$router.push('/login');
     },
   },
   mounted() {
-    // Check if the user is already logged in (e.g., token exists in local storage)
     const accessToken = localStorage.getItem('accessToken');
     if (accessToken) {
       this.isLoggedIn = true;

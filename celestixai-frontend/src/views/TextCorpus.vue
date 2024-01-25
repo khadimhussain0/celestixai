@@ -5,16 +5,28 @@
     </div>
     <!-- Hidden file input to trigger file selection -->
     <input type="file" ref="fileInput" style="display: none" @change="handleFileUpload" />
+
+    <!-- Use NotificationModal component -->
+    <notification-modal
+      :show="showNotification"
+      :message="notificationMessage"
+      :notification-type="notificationType"
+      @close="hideNotification"
+    />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import NotificationModal from '@/components/NotificationModal.vue';
 
 export default {
   data() {
     return {
       modelData: [],
+      showNotification: false,
+      notificationMessage: '',
+      notificationType: 'info', // Default to info type
     };
   },
   methods: {
@@ -41,17 +53,28 @@ export default {
       })
         .then(response => {
           console.log('File uploaded successfully:', response.data);
+          this.showNotificationModal('success', 'File uploaded successfully');
         })
         .catch(error => {
           console.error('Error uploading file:', error);
+          this.showNotificationModal('error', 'Error uploading file');
         });
     },
-  },
-  mounted() {
-    const accessToken = localStorage.getItem('accessToken');
-    if (accessToken) {
-      this.isLoggedIn = true;
-    }
+    showNotificationModal(type, message) {
+      this.notificationType = type;
+      this.notificationMessage = message;
+      this.showNotification = true;
+
+      // Automatically hide the notification after a delay (e.g., 3000 milliseconds)
+      setTimeout(() => {
+        this.hideNotification();
+      }, 3000);
+    },
+    hideNotification() {
+      this.showNotification = false;
+      this.notificationMessage = '';
+      this.notificationType = 'info'; // Reset to default type
+    },
   },
 };
 </script>
