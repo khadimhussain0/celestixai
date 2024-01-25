@@ -24,7 +24,7 @@
         <div v-if="activeTab === 4">
           <Chat/>
         </div>
-        <div v-if="activeTab === 5">Deployments Content</div>
+        <div v-if="activeTab === 5">Deployments</div>
       </div>
     </div>
 </template>
@@ -102,8 +102,9 @@ export default {
   color: #ecf0f1; /* Light text color */
   padding: 20px;
   width: 200px;
-  border-top-left-radius: 15px;
-  border-bottom-left-radius: 15px;
+  /* border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px; */
+  border-radius: 10px;
   overflow-y: auto;
 }
 
