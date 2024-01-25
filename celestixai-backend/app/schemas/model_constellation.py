@@ -27,5 +27,16 @@ class ModelConstellationCreate(BaseModel):
         orm_mode = True
 
 
-class ModelConstellationRead(ModelConstellation):
+class ModelConstellationRead(BaseModel):
     id: int
+    uuid: str
+    icon_uuid: str
+    icon_filename: str
+    model_name: str
+    filename: str
+    parameters: str
+    model_class: str
+    model_task: str
+
+    class Config:
+        orm_mode = True

@@ -4,7 +4,7 @@ from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.model_constellation import ModelConstellation
 from app.models.models import Model
-from app.schemas.models import ModelCreate, ModelRead, ModelUpdateParameters
+from app.schemas.models import ModelCreate, ModelRead, ModelUpdateParameters, ModelsRead
 from typing import List
 
 router = APIRouter(
@@ -42,10 +42,14 @@ def create_model(
     return model_db
 
 
-@router.get("/", response_model=List[ModelRead])
+@router.get("/", response_model=List[ModelsRead])
 def get_models(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     models = (
-        db.query(Model)
+        db.query(Model.id, Model.parameters, Model.model_name,
+                 ModelConstellation.model_class,
+                 ModelConstellation.model_task,
+                 ModelConstellation.icon_uuid, ModelConstellation.uuid,
+                 ModelConstellation.icon_filename, ModelConstellation.filename)
         .join(ModelConstellation, ModelConstellation.id == Model.model_constellation_id)
         .filter(Model.user_id == current_user.id)
         .all()

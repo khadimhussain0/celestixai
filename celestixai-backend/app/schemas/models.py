@@ -21,3 +21,18 @@ class ModelRead(ModelBase):
 
 class ModelUpdateParameters(BaseModel):
     model_name: str
+
+
+class ModelsRead(BaseModel):
+    id: int
+    uuid: str
+    icon_uuid: str
+    icon_filename: str
+    model_name: str
+    filename: str
+    parameters: str
+    model_class: str
+    model_task: str
+
+    class Config:
+        orm_mode = True
