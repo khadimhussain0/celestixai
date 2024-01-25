@@ -1,20 +1,10 @@
 <template>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <div id="app">
-    <!-- <img class="logo_image" alt="CelestixAI logo" src="./assets/logo.png">  -->
-    <HomePage msg="CelestiXAI" />
-  </div>
+  <router-view />
 </template>
 
 <script>
-import HomePage from './components/HomePage.vue';
-
 export default {
   name: 'App',
-  components: {
-    HomePage
-  }
 };
 </script>
 

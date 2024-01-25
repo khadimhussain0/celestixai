@@ -1,0 +1,8 @@
+.dark-background {
+  background-color: #333;
+  color: #fff;
+}
+body, html {
+  margin: 0;
+  padding: 0;
+}
