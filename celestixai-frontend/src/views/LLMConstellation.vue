@@ -1,63 +1,85 @@
 <template>
-    <!-- Render model cards for LLM Constellation -->
-    <div v-for="model in modelData" :key="model.id" class="model-card">
-      <div class="model-info-container">
-        <img src="https://picsum.photos/200" alt="Model Icon" class="model-icon" />
-        <div class="model-info">
-          <div class="model-parameter">{{ model.parameters }}</div>
-          <div class="model-class">{{ model.model_class }}</div>
-          <div class="model-task">{{ model.model_task }}</div>
-          <div class="model-name">{{ model.model_name }}</div>
-        </div>
-      </div>
-      <div class="add-to-workspace-button">
-        <input type="button" value="Add to Workspace">
+  <!-- Render model cards for LLM Constellation -->
+  <div v-for="model in modelData" :key="model.id" class="model-card">
+    <div class="model-info-container">
+      <img src="https://picsum.photos/200" alt="Model Icon" class="model-icon" />
+      <div class="model-info">
+        <div class="model-parameter">{{ model.parameters }}</div>
+        <div class="model-class">{{ model.model_class }}</div>
+        <div class="model-task">{{ model.model_task }}</div>
+        <div class="model-name">{{ model.model_name }}</div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import axios from 'axios';
-  
-  export default {
-    data() {
-      return {
-        modelData: [],
-      };
-    },
-    methods: {
-      async fetchModelData() {
-        try {
-          // Retrieve the token from localStorage
-          const accessToken = localStorage.getItem('accessToken');
-  
-          // Check if the token is present before making the request
-          if (!accessToken) {
-            console.error('Access token not found. Please authenticate first.');
-            return;
-          }
-  
-          const response = await axios.get('http://127.0.0.1:8000/model_constellation/', {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-            },
-          });
-  
-          this.modelData = response.data;
-        } catch (error) {
-          console.error('Failed to fetch model data', error);
-          // Handle error (show error message, etc.)
+    <div class="add-to-workspace-button">
+      <input type="button" value="Add to Workspace" @click="addToWorkspace(model.id)">
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      modelData: [],
+    };
+  },
+  methods: {
+    async fetchModelData() {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          console.error('Access token not found. Please authenticate first.');
+          return;
         }
+
+        const response = await axios.get('http://127.0.0.1:8000/model_constellation/', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+
+        this.modelData = response.data;
+      } catch (error) {
+        console.error('Failed to fetch model data', error);
       }
     },
-    mounted() {
-      // Call the fetchModelData function when the component is mounted
-      this.modelData=[];
-      this.fetchModelData();
-    }
-  };
-  </script>
-  
+    async addToWorkspace(modelId) {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+
+        if (!accessToken) {
+          console.error('Access token not found. Please authenticate first.');
+          return;
+        }
+
+        const apiUrl = 'http://127.0.0.1:8000/models/';
+        const requestData = {
+          id: modelId,
+        };
+
+        await axios.post(apiUrl, requestData, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'accept': 'application/json',
+          },
+        });
+
+        console.log('Model added to workspace successfully!');
+      } catch (error) {
+        console.error('Failed to add model to workspace', error);
+      }
+    },
+  },
+  mounted() {
+    this.modelData = [];
+    this.fetchModelData();
+  },
+};
+</script>
+
   <style scoped>
   .model-card {
     display: flex;
