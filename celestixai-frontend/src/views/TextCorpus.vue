@@ -7,10 +7,9 @@
     <input type="file" ref="fileInput" style="display: none" @change="handleFileUpload" />
   </div>
 </template>
-  
+
 <script>
 import axios from 'axios';
-import { useToast } from 'vue-toastification';
 
 export default {
   data() {
@@ -31,7 +30,6 @@ export default {
       const apiUrl = 'http://127.0.0.1:8000/dataset/';
 
       const formData = new FormData();
-
       formData.append('dataset', file, 'file.jpg');
 
       axios.post(apiUrl, formData, {
@@ -41,24 +39,12 @@ export default {
           'accept': 'application/json',
         },
       })
-        .then(response => response.json())
-        .then(data => {
-          this.showToast('Dataset uploaded successfully!', 'success');
-          console.log('File uploaded successfully:', data);
+        .then(response => {
+          console.log('File uploaded successfully:', response.data);
         })
         .catch(error => {
-          this.showToast('Failed to upload dataset. Please try again.', 'error');
           console.error('Error uploading file:', error);
         });
-    },
-    showToast(message, type) {
-      const toast = useToast();
-      toast[type](message, {
-        position: 'top-right',
-        timeout: 3000,
-        closeOnClick: true,
-        pauseOnHover: true,
-      });
     },
   },
   mounted() {
@@ -67,10 +53,9 @@ export default {
       this.isLoggedIn = true;
     }
   },
-
 };
 </script>
-  
+
 <style scoped>
 .floating-upload-button {
   position: fixed;
@@ -89,4 +74,3 @@ export default {
   background-color: #45a049;
 }
 </style>
-  
