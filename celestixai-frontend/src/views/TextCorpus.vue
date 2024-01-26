@@ -1,5 +1,5 @@
 <template>
-    <div v-for="dataset in datasetData" :key="dataset.id" class="dataset-card">
+  <div v-for="dataset in datasetData" :key="dataset.id" class="dataset-card">
     <div class="dataset-info-container">
       <img src="https://picsum.photos/200" alt="Dataset Icon" class="dataset-icon" />
       <div class="dataset-info">
@@ -55,7 +55,7 @@ export default {
       const apiUrl = 'http://127.0.0.1:8000/dataset/';
 
       const formData = new FormData();
-      formData.append('dataset', file, 'file.jpg');
+      formData.append('dataset', file, file.name);
 
       axios.post(apiUrl, formData, {
         headers: {
@@ -73,8 +73,7 @@ export default {
           this.showNotificationModal('error', 'Error uploading file');
         });
     },
-    
-   async fetchDatasetData() {
+    async fetchDatasetData() {
       try {
         const accessToken = localStorage.getItem('accessToken');
         if (!accessToken) {
@@ -94,35 +93,35 @@ export default {
       }
     },
     async deleteDataset(datasetId) {
-  try {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      console.error('Access token not found. Please authenticate first.');
-      return;
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          console.error('Access token not found. Please authenticate first.');
+          return;
+        }
+
+        const apiUrl = `http://127.0.0.1:8000/dataset/${datasetId}`;
+
+        await axios.delete(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'accept': 'application/json',
+          },
+        });
+
+        this.showNotificationModal('success', 'Dataset deleted successfully!');
+        this.datasetData = [];
+        this.fetchDatasetData();
+      } catch (error) {
+        console.error('Failed to delete dataset', error);
+        this.showNotificationModal('error', 'Failed to delete dataset');
+      }
     }
 
-    const apiUrl = `http://127.0.0.1:8000/dataset/${datasetId}`;
-
-    await axios.delete(apiUrl, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-        'accept': 'application/json',
-      },
-    });
-
-    this.showNotificationModal('success', 'Dataset deleted successfully!');
-    this.datasetData = [];
-    this.fetchDatasetData();
-  } catch (error) {
-    console.error('Failed to delete dataset', error);
-    this.showNotificationModal('error', 'Failed to delete dataset');
   }
-}
-
-}
-,
-mounted() {
+  ,
+  mounted() {
     this.datasetData = [];
     this.fetchDatasetData();
   }
@@ -130,7 +129,6 @@ mounted() {
 </script>
 
 <style scoped>
-
 .dataset-card {
   display: flex;
   align-items: center;
@@ -186,6 +184,7 @@ mounted() {
 .delete-button input:hover {
   background-color: #b92929;
 }
+
 .floating-upload-button {
   position: fixed;
   bottom: 20px;
