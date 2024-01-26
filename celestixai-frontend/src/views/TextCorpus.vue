@@ -7,20 +7,18 @@
     <input type="file" ref="fileInput" style="display: none" @change="handleFileUpload" />
 
     <!-- Use NotificationModal component -->
-    <notification-modal
-      :show="showNotification"
-      :message="notificationMessage"
-      :notification-type="notificationType"
-      @close="hideNotification"
-    />
+    <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
+      @close="hideNotification" />
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import NotificationModal from '@/components/NotificationModal.vue';
+import NotificationMixin from '@/mixins/notificationMixin.js';
 
 export default {
+  mixins: [NotificationMixin],
   data() {
     return {
       modelData: [],
@@ -59,21 +57,6 @@ export default {
           console.error('Error uploading file:', error);
           this.showNotificationModal('error', 'Error uploading file');
         });
-    },
-    showNotificationModal(type, message) {
-      this.notificationType = type;
-      this.notificationMessage = message;
-      this.showNotification = true;
-
-      // Automatically hide the notification after a delay (e.g., 3000 milliseconds)
-      setTimeout(() => {
-        this.hideNotification();
-      }, 3000);
-    },
-    hideNotification() {
-      this.showNotification = false;
-      this.notificationMessage = '';
-      this.notificationType = 'info'; // Reset to default type
     },
   },
 };

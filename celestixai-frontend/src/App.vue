@@ -15,11 +15,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #fff;
-  margin: 0; /* Remove default margin */
-  padding: 0; /* Remove default padding */
+  margin: 0;
+  /* Remove default margin */
+  padding: 0;
+  /* Remove default padding */
   background: url('../src/assets/logo-unsampled.png') center center no-repeat;
   background-size: cover;
-  min-height: 100vh; /* Make sure the background covers the entire viewport height */
+  min-height: 100vh;
+  /* Make sure the background covers the entire viewport height */
 }
 
 
@@ -30,5 +33,4 @@ body {
   left: 10px;
   width: 100px;
   height: auto;
-}
-</style>
+}</style>

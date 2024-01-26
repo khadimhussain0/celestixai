@@ -36,20 +36,30 @@
         </div>
         <div class="form-group">
           <label for="loginPassword">Password</label>
-          <input v-model="loginData.password" type="password" id="loginPassword" placeholder="Enter your password" required>
+          <input v-model="loginData.password" type="password" id="loginPassword" placeholder="Enter your password"
+            required>
         </div>
         <button type="submit" class="auth-btn">Login</button>
       </form>
     </div>
   </div>
+  <!-- Use NotificationModal component -->
+  <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
+    @close="hideNotification" />
 </template>
 
 <script>
 import axios from 'axios';
+import NotificationModal from '@/components/NotificationModal.vue';
+import NotificationMixin from '@/mixins/notificationMixin.js';
 
 export default {
+  mixins: [NotificationMixin],
   data() {
     return {
+      showNotification: false,
+      notificationMessage: '',
+      notificationType: 'info', // Default to info type
       isRegister: false,
       registerData: {
         firstname: '',
@@ -68,32 +78,40 @@ export default {
       try {
         const response = await axios.post('http://127.0.0.1:8000/user', this.registerData);
         console.log('User Registration Response:', response.data);
-        this.$router.push('/app');
-        // Display a success message or perform any other action
+        this.showNotificationModal('success', 'Wellcome Aboard!\n Please Login to continue');
+        this.isRegister = false;
+        this.registerData = {
+          firstname: '',
+          lastname: '',
+          email: '',
+          password: '',
+        };
+        // this.$router.push('/app');
       } catch (error) {
         console.error('Error creating account:', error.message);
-        // Display a toast or any other error handling mechanism
+        this.showNotificationModal('error', 'Error creating acccount');
       }
     },
     async loginUser() {
-        try {
-          const params = new URLSearchParams();
-          params.append('username', this.loginData.email);
-          params.append('password', this.loginData.password);
-  
-          const response = await axios.post('http://127.0.0.1:8000/login/', params, {
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-          });
-  
-          const accessToken = response.data.access_token;
-          localStorage.setItem('accessToken', accessToken);
-          this.$router.push('/app');
-        } catch (error) {
-          console.error('Login failed', error);
-        }
-      },
+      try {
+        const params = new URLSearchParams();
+        params.append('username', this.loginData.email);
+        params.append('password', this.loginData.password);
+
+        const response = await axios.post('http://127.0.0.1:8000/login/', params, {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        });
+
+        const accessToken = response.data.access_token;
+        localStorage.setItem('accessToken', accessToken);
+        this.$router.push('/app');
+      } catch (error) {
+        console.error('Login failed', error);
+        this.showNotificationModal('error', 'Login failed please try again');
+      }
+    },
     toggleForm() {
       this.isRegister = !this.isRegister;
     },
@@ -121,7 +139,7 @@ export default {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   background-color: #fff;
   text-align: center;
-  
+
 }
 
 .auth-title {

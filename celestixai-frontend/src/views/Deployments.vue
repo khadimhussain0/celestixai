@@ -1,14 +1,12 @@
 <template>
-    <div>
-      <p>Deployments</p>
-    </div>
-  </template>
+  <div>
+    <p>Deployments</p>
+  </div>
+</template>
   
-  <script>
+<script>
 
-  </script>
+</script>
   
-  <style scoped>
-
-  </style>
+<style scoped></style>
   

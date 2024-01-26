@@ -20,18 +20,16 @@
 </template>
 
 <script>
-import {Chart} from 'chart.js/auto';
+import { Chart } from 'chart.js/auto';
 
 export default {
   mounted() {
     this.renderModelUsageChart();
     this.renderTokensUsageChart();
     this.renderTotalTokensChart();
-    // Render other charts here
   },
   methods: {
     renderModelUsageChart() {
-      // Example data, replace with your actual data
       const data = {
         labels: ['Model A', 'Model B', 'Model C'],
         datasets: [{
@@ -46,7 +44,7 @@ export default {
       this.renderChart('modelUsageChart', 'line', data);
     },
     renderTokensUsageChart() {
-      // Example data, replace with your actual data
+      // Example data
       const data = {
         labels: ['Model A', 'Model B', 'Model C'],
         datasets: [{
@@ -59,7 +57,7 @@ export default {
       this.renderChart('tokensUsageChart', 'bar', data);
     },
     renderTotalTokensChart() {
-      // Example data, replace with your actual data
+      // Example data
       const data = {
         labels: ['User 1', 'User 2', 'User 3'],
         datasets: [{
@@ -71,7 +69,7 @@ export default {
 
       this.renderChart('totalTokensChart', 'bar', data);
     },
-    // Add more methods for other charts
+    // more methods for other charts
     renderChart(ref, type, data) {
       const ctx = this.$refs[ref].getContext('2d');
       new Chart(ctx, {

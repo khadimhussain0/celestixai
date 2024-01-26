@@ -20,8 +20,11 @@
 
 <script>
 import axios from 'axios';
+import NotificationModal from '@/components/NotificationModal.vue';
+import NotificationMixin from '@/mixins/notificationMixin.js';
 
 export default {
+  mixins: [NotificationMixin],
   data() {
     return {
       modelData: [],
@@ -33,10 +36,7 @@ export default {
   methods: {
     async fetchModelData() {
       try {
-        // Retrieve the token from localStorage
         const accessToken = localStorage.getItem('accessToken');
-
-        // Check if the token is present before making the request
         if (!accessToken) {
           console.error('Access token not found. Please authenticate first.');
           return;
@@ -51,20 +51,15 @@ export default {
         this.modelData = response.data;
       } catch (error) {
         console.error('Failed to fetch model data', error);
-        // Handle error (show error message, etc.)
       }
     },
     async addToWorkspace(modelId) {
       try {
-        // Retrieve the token from localStorage
         const accessToken = localStorage.getItem('accessToken');
-
-        // Check if the token is present before making the request
         if (!accessToken) {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-
         const apiUrl = 'http://127.0.0.1:8000/models/';
         const requestData = {
           id: modelId,
@@ -82,20 +77,6 @@ export default {
         console.error('Failed to add model to workspace', error);
         this.showNotificationModal('error', 'Failed to add model to workspace');
       }
-    },
-    showNotificationModal(type, message) {
-      this.notificationType = type;
-      this.notificationMessage = message;
-      this.showNotification = true;
-
-      setTimeout(() => {
-        this.hideNotification();
-      }, 3000);
-    },
-    hideNotification() {
-      this.showNotification = false;
-      this.notificationMessage = '';
-      this.notificationType = 'info'; // Reset to default type
     },
   },
   mounted() {
