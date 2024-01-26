@@ -42,7 +42,7 @@ def create_dataset(
     return dataset_db
 
 
-@router.get("/get-datasets", response_model=List[DatasetRead])
+@router.get("/", response_model=List[DatasetRead])
 def get_datasets(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     datasets = db.query(Dataset).filter(Dataset.owner_id == current_user.id).all()
     if len(datasets) == 0:
