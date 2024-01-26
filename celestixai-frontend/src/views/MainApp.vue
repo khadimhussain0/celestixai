@@ -35,7 +35,7 @@ import LLMConstellation from '@/views/LLMConstellation.vue';
 import LLMs from '@/views/LLMs.vue';
 import Chat from '@/views/Chat.vue';
 import Dashboard from '@/views/Dashboard.vue';
-import CreateAccount from '@/components/CreateAccount.vue'
+import Auth from '@/components/Auth.vue'
 
 export default {
   data() {
@@ -51,7 +51,7 @@ export default {
     LLMConstellation,
     LLMs,
     Chat,
-    CreateAccount
+    Auth
 },
   methods: {
     changeTab(index) {
@@ -61,7 +61,7 @@ export default {
       // Clear the token from local storage or cookie
         localStorage.removeItem('accessToken');
         this.isLoggedIn = false;
-        this.$router.push('/login');
+        this.$router.push('/auth');
     },
   },
   mounted() {

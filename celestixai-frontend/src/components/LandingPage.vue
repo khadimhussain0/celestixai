@@ -10,7 +10,7 @@
   export default {
     methods: {
       redirectToCreateAccount() {
-        this.$router.push('/login');
+        this.$router.push('/auth');
       },
     },
   };
