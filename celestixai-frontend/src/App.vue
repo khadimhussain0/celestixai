@@ -19,7 +19,7 @@ body {
   /* Remove default margin */
   padding: 0;
   /* Remove default padding */
-  background: url('../src/assets/logo-unsampled.png') center center no-repeat;
+  background: url('../src/assets/background-logo.png') center center no-repeat;
   background-size: cover;
   min-height: 100vh;
   /* Make sure the background covers the entire viewport height */
