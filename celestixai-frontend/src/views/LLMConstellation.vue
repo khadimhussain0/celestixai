@@ -14,6 +14,8 @@
       <input type="button" value="Add to Workspace" @click="addToWorkspace(model.id)">
     </div>
   </div>
+  <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
+    @close="hideNotification" />
 </template>
 
 <script>
@@ -23,12 +25,18 @@ export default {
   data() {
     return {
       modelData: [],
+      showNotification: false,
+      notificationMessage: '',
+      notificationType: 'info', // Default to info type
     };
   },
   methods: {
     async fetchModelData() {
       try {
+        // Retrieve the token from localStorage
         const accessToken = localStorage.getItem('accessToken');
+
+        // Check if the token is present before making the request
         if (!accessToken) {
           console.error('Access token not found. Please authenticate first.');
           return;
@@ -43,12 +51,15 @@ export default {
         this.modelData = response.data;
       } catch (error) {
         console.error('Failed to fetch model data', error);
+        // Handle error (show error message, etc.)
       }
     },
     async addToWorkspace(modelId) {
       try {
+        // Retrieve the token from localStorage
         const accessToken = localStorage.getItem('accessToken');
 
+        // Check if the token is present before making the request
         if (!accessToken) {
           console.error('Access token not found. Please authenticate first.');
           return;
@@ -66,11 +77,25 @@ export default {
             'accept': 'application/json',
           },
         });
-
-        console.log('Model added to workspace successfully!');
+        this.showNotificationModal('success', 'Model added to workspace successfully!');
       } catch (error) {
         console.error('Failed to add model to workspace', error);
+        this.showNotificationModal('error', 'Failed to add model to workspace');
       }
+    },
+    showNotificationModal(type, message) {
+      this.notificationType = type;
+      this.notificationMessage = message;
+      this.showNotification = true;
+
+      setTimeout(() => {
+        this.hideNotification();
+      }, 3000);
+    },
+    hideNotification() {
+      this.showNotification = false;
+      this.notificationMessage = '';
+      this.notificationType = 'info'; // Reset to default type
     },
   },
   mounted() {
@@ -80,58 +105,60 @@ export default {
 };
 </script>
 
-  <style scoped>
-  .model-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    transition: background-color 0.5s ease; /* Smooth transition */
-  }
+<style scoped>
+.model-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  transition: background-color 0.5s ease;
+  /* Smooth transition */
+}
 
-  .model-card:hover {
-    background: linear-gradient(45deg, #3498db, #1abc9c); /* Gradient background on hover */
-  }
+.model-card:hover {
+  background: linear-gradient(45deg, #3498db, #1abc9c);
+  /* Gradient background on hover */
+}
 
-  .model-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
-  }
+.model-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
 
-  .model-info-container {
-    display: flex;
-    align-items: center;
-  }
+.model-info-container {
+  display: flex;
+  align-items: center;
+}
 
-  .model-info {
-    display: flex;
-    flex-direction: column;
-  }
+.model-info {
+  display: flex;
+  flex-direction: column;
+}
 
-  .model-parameter,
-  .model-class,
-  .model-task,
-  .model-name {
-    margin-bottom: 5px;
-  }
+.model-parameter,
+.model-class,
+.model-task,
+.model-name {
+  margin-bottom: 5px;
+}
 
-  .add-to-workspace-button input {
-    background-color: #3498db;
-    color: #fff;
-    padding: 10px;
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: background-color 0.3s;
-  }
+.add-to-workspace-button input {
+  background-color: #3498db;
+  color: #fff;
+  padding: 10px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
 
-  .add-to-workspace-button input:hover {
-    background-color: #2980b9;
-  }
+.add-to-workspace-button input:hover {
+  background-color: #2980b9;
+}
 </style>
