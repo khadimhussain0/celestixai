@@ -11,7 +11,7 @@ import MainApp from '../views/MainApp.vue';
 
 const routes = [
   { path: '/landingpage', component: LandingPage },
-  { path: '/', redirect: '/landingpage', meta: { requiresAuth: true } },
+  { path: '/', redirect: '/landingpage' },
   { path: '/:catchAll(.*)', redirect: '/landingpage' },
   {path:  '/auth', component : Auth},
   { path: '/app', component: MainApp, meta: { requiresAuth: true } },
