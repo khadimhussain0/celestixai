@@ -31,6 +31,7 @@
 import axios from 'axios';
 import NotificationModal from '@/components/NotificationModal.vue';
 import NotificationMixin from '@/mixins/notificationMixin.js';
+import { BACKEND_API_URL } from '../services/config';
 
 export default {
   mixins: [NotificationMixin],
@@ -52,7 +53,8 @@ export default {
     },
     sendFileToApi(file) {
       const accessToken = localStorage.getItem('accessToken');
-      const apiUrl = 'http://127.0.0.1:8000/dataset/';
+      const baseUrl = new URL(BACKEND_API_URL);
+      const apiUrl = `${baseUrl.origin}/dataset/`;
 
       const formData = new FormData();
       formData.append('dataset', file, file.name);
@@ -80,8 +82,8 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-
-        const response = await axios.get('http://127.0.0.1:8000/dataset/', {
+        const baseUrl = new URL(BACKEND_API_URL);
+        const response = await axios.get(`${baseUrl.origin}/dataset/`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
@@ -99,8 +101,8 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-
-        const apiUrl = `http://127.0.0.1:8000/dataset/${datasetId}`;
+        const baseUrl = new URL(BACKEND_API_URL);
+        const apiUrl = `${baseUrl.origin}/dataset/${datasetId}`;
 
         await axios.delete(apiUrl, {
           headers: {

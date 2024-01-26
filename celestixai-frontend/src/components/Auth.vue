@@ -52,6 +52,7 @@
 import axios from 'axios';
 import NotificationModal from '@/components/NotificationModal.vue';
 import NotificationMixin from '@/mixins/notificationMixin.js';
+import { BACKEND_API_URL } from '../services/config';
 
 export default {
   mixins: [NotificationMixin],
@@ -76,7 +77,8 @@ export default {
   methods: {
     async registerUser() {
       try {
-        const response = await axios.post('http://127.0.0.1:8000/user', this.registerData);
+        const baseUrl = new URL(BACKEND_API_URL);
+        const response = await axios.post(`${baseUrl.origin}/user`, this.registerData);
         console.log('User Registration Response:', response.data);
         this.showNotificationModal('success', 'Wellcome Aboard!\n Please Login to continue');
         this.isRegister = false;
@@ -97,8 +99,8 @@ export default {
         const params = new URLSearchParams();
         params.append('username', this.loginData.email);
         params.append('password', this.loginData.password);
-
-        const response = await axios.post('http://127.0.0.1:8000/login/', params, {
+        const baseUrl = new URL(BACKEND_API_URL);
+        const response = await axios.post(`${baseUrl.origin}/login/`, params, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },

@@ -18,6 +18,7 @@
   
 <script>
 import axios from 'axios';
+import { BACKEND_API_URL } from '../services/config';
 
 export default {
   data() {
@@ -33,8 +34,8 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-
-        const response = await axios.get('http://127.0.0.1:8000/models/', {
+        const baseUrl = new URL(BACKEND_API_URL);
+        const response = await axios.get(`${baseUrl.origin}/models/`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },

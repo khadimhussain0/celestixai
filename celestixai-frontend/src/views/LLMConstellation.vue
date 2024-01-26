@@ -22,6 +22,7 @@
 import axios from 'axios';
 import NotificationModal from '@/components/NotificationModal.vue';
 import NotificationMixin from '@/mixins/notificationMixin.js';
+import { BACKEND_API_URL } from '../services/config';
 
 export default {
   mixins: [NotificationMixin],
@@ -41,8 +42,8 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-
-        const response = await axios.get('http://127.0.0.1:8000/model_constellation/', {
+        const baseUrl = new URL(BACKEND_API_URL);
+        const response = await axios.get(`${baseUrl.origin}/model_constellation/`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
@@ -60,7 +61,8 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-        const apiUrl = 'http://127.0.0.1:8000/models/';
+        const baseUrl = new URL(BACKEND_API_URL);
+        const apiUrl = `${baseUrl.origin}/models/`;
         const requestData = {
           id: modelId,
         };
