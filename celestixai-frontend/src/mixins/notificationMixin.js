@@ -7,7 +7,7 @@ export default {
 
       setTimeout(() => {
         this.hideNotification();
-      }, 3000);
+      }, 1000);
     },
     hideNotification() {
       this.showNotification = false;
