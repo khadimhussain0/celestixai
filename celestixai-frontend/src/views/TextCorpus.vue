@@ -144,7 +144,7 @@ export default {
 }
 
 .dataset-card:hover {
-  background: linear-gradient(45deg, #3498db, #1abc9c);
+  background: linear-gradient(360deg, #90b9f6 , #92f879);
   /* Gradient background on hover */
 }
 
@@ -170,6 +170,14 @@ export default {
 .dataset-task,
 .dataset-name {
   margin-bottom: 5px;
+  font-weight: bold;
+  background: linear-gradient(to right, #07a825, #2339df);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  border-radius: 3px;
+  text-align: left;
+  font-family: 'Roboto', sans-serif;
 }
 
 .delete-button input {

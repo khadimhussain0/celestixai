@@ -4,10 +4,10 @@
     <div class="model-info-container">
       <img src="https://picsum.photos/200" alt="Model Icon" class="model-icon" />
       <div class="model-info">
-        <div class="model-parameter">{{ model.parameters }}</div>
-        <div class="model-class">{{ model.model_class }}</div>
-        <div class="model-task">{{ model.model_task }}</div>
-        <div class="model-name">{{ model.model_name }}</div>
+        <div class="model-parameter"> Model Name: {{ model.model_name }}</div>
+        <div class="model-class">Parameters: {{ model.parameters }}</div>
+        <div class="model-task">Model Class: {{ model.model_class }}</div>
+        <div class="model-name">Supported Tasks: {{ model.model_task }}</div>
       </div>
     </div>
     <div class="add-to-workspace-button">
@@ -102,8 +102,7 @@ export default {
 }
 
 .model-card:hover {
-  background: linear-gradient(45deg, #3498db, #1abc9c);
-  /* Gradient background on hover */
+  background: linear-gradient(360deg, #90b9f6 , #92f879);
 }
 
 .model-icon {
@@ -128,6 +127,14 @@ export default {
 .model-task,
 .model-name {
   margin-bottom: 5px;
+  font-weight: bold;
+  background: linear-gradient(to right, #07a825, #2339df);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  border-radius: 3px;
+  text-align: left;
+  font-family: 'Roboto', sans-serif;
 }
 
 .add-to-workspace-button input {
@@ -143,5 +150,58 @@ export default {
 
 .add-to-workspace-button input:hover {
   background-color: #2980b9;
+}
+
+
+.add-to-workspace-button input {
+  position: relative;
+  display: inline-block;
+  width: 180px;
+  height: 40px;
+  text-align: center;
+  color: #fff;
+  font-size: 14px;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-family: sans-serif;
+  box-sizing: border-box;
+  background: linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+  background-size: 400%;
+  border-radius: 30px;
+  z-index: 1;
+}
+ 
+.add-to-workspace-button input:hover {
+  animation: animate 8s linear infinite;
+}
+ 
+@keyframes animate {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 400%;
+  }
+}
+ 
+.add-to-workspace-button input:before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  bottom: -5px;
+  left: -5px;
+  z-index: -1;
+  background: linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+  background-size: 400%;
+  border-radius: 40px;
+  opacity: 0;
+  transition: .5s;
+}
+ 
+.add-to-workspace-button input:hover:before {
+  filter: blur(20px);
+  opacity: 1;
+  animation: animate 8s linear infinite;
 }
 </style>
