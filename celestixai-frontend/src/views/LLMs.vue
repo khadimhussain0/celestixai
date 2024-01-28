@@ -10,21 +10,44 @@
         <div class="model-name">Model Task: {{ model.model_task }}</div>
       </div>
     </div>
-    <div class="finetune-btn">
-      <input type="button" value="Fine Tune">
+    <div class="button-container">
+      <div class="finetune-btn">
+        <input type="button" value="Fine Tune">
+      </div>
+      <div class="config-btn">
+        <input type="button" value="Config" @click="openConfigModal(model)">
+      </div>
     </div>
+    <!-- Include the ChangeConfigModel component -->
+    <change-config-model v-if="showConfigModal" :model="selectedModel" @config-changed="handleConfigChanged"
+     @close="closeConfigModal"/>
+          <!-- Use NotificationModal component -->
+          <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
+        @close="hideNotification" />
   </div>
 </template>
-  
+
 <script>
 import axios from 'axios';
 import { BACKEND_API_URL } from '../services/config';
+import ChangeConfigModel from '@/components/ChangeConfigModal.vue';
+import NotificationModal from '@/components/NotificationModal.vue';
+import NotificationMixin from '@/mixins/notificationMixin.js';
 
 export default {
+  mixins: [NotificationMixin],
   data() {
     return {
       modelData: [],
+      showConfigModal: false,
+      selectedModel: null,
+      showNotification: false,
+      notificationMessage: '',
+      notificationType: 'info', 
     };
+  },
+  components: {
+    ChangeConfigModel,
   },
   methods: {
     async fetchModelData() {
@@ -45,10 +68,22 @@ export default {
       } catch (error) {
         console.error('Failed to fetch model data', error);
       }
-    }
+    },
+    openConfigModal(model) {
+      this.selectedModel = model;
+      this.showConfigModal = true;
+    },
+    closeConfigModal() {
+      this.showConfigModal = false;
+    },
+    handleConfigChanged({ type, message }) {
+      // Handle the config change event, show notification
+      this.showNotificationModal(type, message);
+      this.showConfigModal = false;
+      this.fetchModelData();
+    },
   },
   mounted() {
-    // Calling fetchModelData function when the component is mounted
     this.modelData = [];
     this.fetchModelData();
   }
@@ -105,27 +140,17 @@ export default {
   font-family: 'Roboto', sans-serif;
 }
 
-.finetune-btn input {
-  background-color: #3498db;
-  color: #fff;
-  padding: 10px;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: background-color 0.3s;
-}
-
-.finetune-btn input:hover {
+.button-container input:hover {
   background-color: #2980b9;
 }
 
 
-.finetune-btn input {
+.button-container input {
   position: relative;
   display: inline-block;
+  cursor: pointer;
   width: 100px;
-  height: 40px;
+  height: 35px;
   text-align: center;
   color: #fff;
   font-size: 14px;
@@ -133,13 +158,16 @@ export default {
   text-decoration: none;
   font-family: sans-serif;
   box-sizing: border-box;
+  margin: 3px;
   background: linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+  transition: background-color 0.3s;
   background-size: 400%;
+  border: none;
   border-radius: 30px;
   z-index: 1;
 }
  
-.finetune-btn input:hover {
+.button-container input:hover {
   animation: animate 8s linear infinite;
 }
  
