@@ -20,4 +20,4 @@ class ModelConstellation(Base):
     created_date = Column(DateTime, default=datetime.utcnow)
     updated_date = Column(DateTime, default=datetime.utcnow)
 
-    models = relationship("Model", back_populates="model_constellation")
+    model = relationship("Model", back_populates="model_constellation")

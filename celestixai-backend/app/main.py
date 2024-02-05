@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.routes import user, login
 from app.routes import model_constellation, models
+from app.routes import chat
 from app.core.database import engine, Base
 
 
@@ -33,3 +34,4 @@ app.include_router(login.router)
 app.include_router(dataset.router)
 app.include_router(model_constellation.router)
 app.include_router(models.router)
+app.include_router(chat.router)

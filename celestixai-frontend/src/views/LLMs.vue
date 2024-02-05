@@ -17,6 +17,9 @@
       <div class="config-btn">
         <input type="button" value="Config" @click="openConfigModal(model)">
       </div>
+      <div class="config-btn">
+        <input type="button" value="Deploy">
+      </div>
     </div>
     <!-- Include the ChangeConfigModel component -->
     <change-config-model v-if="showConfigModal" :model="selectedModel" @config-changed="handleConfigChanged"

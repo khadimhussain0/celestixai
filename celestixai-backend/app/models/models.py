@@ -5,13 +5,15 @@ from datetime import datetime
 
 
 class Model(Base):
-    __tablename__ = "models"
+    __tablename__ = "model"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     uuid = Column(String, unique=True, nullable=True)
     filename = Column(String, nullable=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship("User", back_populates="model")
     model_constellation_id = Column(Integer, ForeignKey('model_constellation.id'))
+    model_constellation = relationship("ModelConstellation", back_populates="model")
     fine_tuned_model_path = Column(String, nullable=True)
     fine_tuned = Column(Boolean, nullable=True)
     train = Column(Boolean, nullable=True)
@@ -20,5 +22,3 @@ class Model(Base):
 
     created_date = Column(DateTime, default=datetime.utcnow)
     updated_date = Column(DateTime, default=datetime.utcnow)
-
-    model_constellation = relationship("ModelConstellation", back_populates="models")
