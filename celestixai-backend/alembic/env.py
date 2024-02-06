@@ -27,7 +27,7 @@ from app.models.user import User
 from app.models.models import Model
 from app.models.dataset import Dataset
 from app.models.model_constellation import ModelConstellation
-target_metadata = User.metadata
+target_metadata = Chat.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

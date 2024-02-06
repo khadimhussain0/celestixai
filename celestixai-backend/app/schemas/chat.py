@@ -2,7 +2,7 @@ from typing import List, Dict, Union, Optional
 from pydantic import BaseModel
 
 
-class Message(BaseModel):
+class ChatMessage(BaseModel):
     message_id: str
     role: str
     content: str
@@ -11,10 +11,11 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     model: str
+    model_id: int
     timestamp: int
     chat_id: int
     chat_title: str
-    messages: List[Message]
+    messages: List[ChatMessage]
 
 
 # # Example usage:

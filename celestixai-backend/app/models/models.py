@@ -22,3 +22,5 @@ class Model(Base):
 
     created_date = Column(DateTime, default=datetime.utcnow)
     updated_date = Column(DateTime, default=datetime.utcnow)
+
+    chat = relationship("Chat", back_populates="model")
