@@ -3,8 +3,8 @@
     <div class="model-selection">
       <label for="modelDropdown" class="dropdown-label">Select Model:</label>
       <div class="custom-dropdown">
-        <select id="modelDropdown" v-model="selectedModel" @change="changeModel" class="dropdown">
-          <option v-for="model in models" :value="model" :key="model.id">{{ model.name }}</option>
+        <select id="modelDropdown" v-model="selectedModel" @change="changeModel" @click="fetchModelData" class="dropdown">
+          <option v-for="model in models" :value="model" :key="model.id">{{ model.model_name }}</option>
         </select>
         <div class="dropdown-icon">
           <i class="fas fa-chevron-down"></i>
@@ -31,15 +31,27 @@
       </div>
     </div>
   </div>
+  <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
+    @close="hideNotification" />
 </template>
 
 <script>
+import axios from "axios";
 import Spinner from "@/components/Spinner.vue"
+import NotificationModal from '@/components/NotificationModal.vue';
 import NotificationMixin from '@/mixins/notificationMixin.js';
+import {origin} from "@/services/config";
 
 export default {
+  mixins: [NotificationMixin],
+  components: {
+    NotificationModal
+  },
   data() {
     return {
+      showNotification: false,
+      notificationMessage: '',
+      notificationType: 'info',
       loading: false,
       models: [
         { name: 'Model A', id: 1, is_vision: true },
@@ -67,9 +79,30 @@ export default {
         console.log("Selected Model Data:", this.selectedModel);
       }
     },
-    sendMessage() {
-      if (this.userInput.text.trim() === '' && !this.userInput.image) return;
+    async fetchModelData() {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          console.error('Access token not found. Please authenticate first.');
+          return;
+        }
+        const response = await axios.get(`${origin}/model_constellation/`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
 
+        this.models = response.data;
+      } catch (error) {
+        console.error('Failed to fetch model data', error);
+      }
+    },
+    sendMessage() {
+      if (!this.selectedModel){
+        this.showNotificationModal('error', 'Please select a model to chat');
+        return
+      }
+      if (this.userInput.text.trim() === '' && !this.userInput.image) return;
       // Add user message to the chat
       this.messages.push({ id: Date.now(), text: this.userInput.text, image: this.userInput.image, isUser: true });
 
