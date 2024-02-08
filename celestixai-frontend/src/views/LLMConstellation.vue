@@ -4,10 +4,11 @@
     <div class="model-info-container">
       <img src="https://picsum.photos/200" alt="Model Icon" class="model-icon" />
       <div class="model-info">
-        <div class="model-parameter"> Model Name: {{ model.model_name }}</div>
-        <div class="model-class">Parameters: {{ model.parameters }}</div>
-        <div class="model-task">Model Class: {{ model.model_class }}</div>
-        <div class="model-name">Supported Tasks: {{ model.model_task }}</div>
+        <div class="model-name">Model Name: {{ model.model_name }}</div>
+        <div class="model-parameters">Parameters: {{ model.parameters }}</div>
+        <div class="model-is_vision">Vision: {{ model.is_vision ? "Supported" : "Not supported" }}</div>
+        <div class="model-class">Model Class: {{ model.model_class }}</div>
+        <div class="model-task">Model Tasks: {{ model.model_task }}</div>
       </div>
     </div>
     <div class="add-to-workspace-button">
@@ -22,7 +23,7 @@
 import axios from 'axios';
 import NotificationModal from '@/components/NotificationModal.vue';
 import NotificationMixin from '@/mixins/notificationMixin.js';
-import { BACKEND_API_URL } from '../services/config';
+import { origin } from '../services/config';
 
 export default {
   mixins: [NotificationMixin],
@@ -42,8 +43,7 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-        const baseUrl = new URL(BACKEND_API_URL);
-        const response = await axios.get(`${baseUrl.origin}/model_constellation/`, {
+        const response = await axios.get(`${origin}/model_constellation/`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
@@ -61,8 +61,7 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-        const baseUrl = new URL(BACKEND_API_URL);
-        const apiUrl = `${baseUrl.origin}/models/`;
+        const apiUrl = `${origin}/models/`;
         const requestData = {
           id: modelId,
         };
@@ -122,7 +121,8 @@ export default {
   flex-direction: column;
 }
 
-.model-parameter,
+.model-parameters,
+.model-is_vision,
 .model-class,
 .model-task,
 .model-name {

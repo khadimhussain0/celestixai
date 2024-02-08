@@ -40,7 +40,7 @@ export default {
   z-index: 1000;
   background-color: rgba(0, 0, 0, 0.8);
   color: #fff;
-  padding: 20px;
+  padding: 2px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   text-align: center;
@@ -48,6 +48,8 @@ export default {
 
 .notification-content {
   padding: 15px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f441a5, #03a9f4);
 }
 
 .info {

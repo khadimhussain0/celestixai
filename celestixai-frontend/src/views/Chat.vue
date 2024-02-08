@@ -1,10 +1,15 @@
 <template>
   <div class="chat-container">
     <div class="model-selection">
-      <label for="modelDropdown">Select Model:</label>
-      <select id="modelDropdown" v-model="selectedModel" @change="changeModel">
-        <option v-for="model in models" :value="model.value" :key="model.value">{{ model.label }}</option>
-      </select>
+      <label for="modelDropdown" class="dropdown-label">Select Model:</label>
+      <div class="custom-dropdown">
+        <select id="modelDropdown" v-model="selectedModel" @change="changeModel" class="dropdown">
+          <option v-for="model in models" :value="model" :key="model.id">{{ model.name }}</option>
+        </select>
+        <div class="dropdown-icon">
+          <i class="fas fa-chevron-down"></i>
+        </div>
+      </div>
     </div>
 
     <div class="chat-window">
@@ -19,7 +24,6 @@
       <div class="user-input">
         <label v-if="isVisionModel" for="imageUpload" class="attachment-icon">
           🖼️
-          <!-- <img src="attachment_icon.png" alt="Attachment Icon" /> -->
         </label>
         <input id="imageUpload" v-if="isVisionModel" type="file" @change="onImageChange" accept="image/*" />
         <input v-model="userInput.text" @keyup.enter="sendMessage" placeholder="Type your message..." />
@@ -30,16 +34,20 @@
 </template>
 
 <script>
+import Spinner from "@/components/Spinner.vue"
+import NotificationMixin from '@/mixins/notificationMixin.js';
+
 export default {
   data() {
     return {
+      loading: false,
       models: [
-        { label: 'Model A', value: {name:'LLAMA', id:2, is_vision:true, metadata:{}} },
-        { label: 'Model B', value: {name:'LLAMA2', id:2, is_vision:false, metadata:{}} },
-        { label: 'Model 3', value: {name:'LLAMA3', id:2, is_vision:true, metadata:{}} },
+        { name: 'Model A', id: 1, is_vision: true },
+        { name: 'Model B', id: 2, is_vision: false },
+        { name: 'Model C', id: 3, is_vision: true },
         // Add more models as needed
       ],
-      selectedModel: 'modelA',
+      selectedModel: null,
       userInput: {
         text: '',
         image: null,
@@ -54,8 +62,10 @@ export default {
   },
   methods: {
     changeModel() {
-      // Logic to switch language model
-      // You may want to fetch model-specific data here
+      // Print all data of the selected model in the console
+      if (this.selectedModel) {
+        console.log("Selected Model Data:", this.selectedModel);
+      }
     },
     sendMessage() {
       if (this.userInput.text.trim() === '' && !this.userInput.image) return;
@@ -88,6 +98,7 @@ export default {
 };
 </script>
   
+
 <style scoped>
 .chat-container {
   display: flex;
@@ -118,6 +129,66 @@ select {
   cursor: pointer;
 }
 
+.custom-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Styling for the dropdown */
+.dropdown {
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  width: 200px; /* Adjust width as needed */
+  outline: none;
+}
+
+/* Styling for the dropdown icon */
+.dropdown-icon {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+}
+
+/* Styling for the dropdown arrow */
+.dropdown-icon i {
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+/* Rotate the arrow on hover */
+.custom-dropdown:hover .dropdown-icon i {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Additional styling for the dropdown label */
+.dropdown-label {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #666;
+}
+
+/* Custom scrollbar for the dropdown options */
+.dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdown::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+.dropdown::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
 .chat-window {
   flex-grow: 1;
   overflow-y: auto;

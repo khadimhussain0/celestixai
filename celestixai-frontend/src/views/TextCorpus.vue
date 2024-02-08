@@ -25,18 +25,24 @@
     <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
       @close="hideNotification" />
   </div>
+  <spinner :loading="loading" />
 </template>
 
 <script>
 import axios from 'axios';
 import NotificationModal from '@/components/NotificationModal.vue';
 import NotificationMixin from '@/mixins/notificationMixin.js';
-import { BACKEND_API_URL } from '../services/config';
+import { BACKEND_API_URL, origin } from '../services/config';
+import Spinner from "@/components/Spinner.vue"
 
 export default {
   mixins: [NotificationMixin],
+  components:{
+    Spinner
+  },
   data() {
     return {
+      loading: false,
       datasetData: [],
       showNotification: false,
       notificationMessage: '',
@@ -48,13 +54,10 @@ export default {
       this.$refs.fileInput.click();
     },
     handleFileUpload(event) {
+      this.loading = true;
       const file = event.target.files[0];
-      this.sendFileToApi(file);
-    },
-    sendFileToApi(file) {
       const accessToken = localStorage.getItem('accessToken');
-      const baseUrl = new URL(BACKEND_API_URL);
-      const apiUrl = `${baseUrl.origin}/dataset/`;
+      const apiUrl = `${origin}/dataset/`;
 
       const formData = new FormData();
       formData.append('dataset', file, file.name);
@@ -68,13 +71,18 @@ export default {
       })
         .then(response => {
           console.log('File uploaded successfully:', response.data);
+          this.datasetData = [...this.datasetData, response.data]
           this.showNotificationModal('success', 'File uploaded successfully');
         })
         .catch(error => {
           console.error('Error uploading file:', error);
           this.showNotificationModal('error', 'Error uploading file');
+        })
+        .finally(()=>{
+          this.loading = false;
         });
     },
+    
     async fetchDatasetData() {
       try {
         const accessToken = localStorage.getItem('accessToken');
@@ -82,8 +90,7 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-        const baseUrl = new URL(BACKEND_API_URL);
-        const response = await axios.get(`${baseUrl.origin}/dataset/`, {
+        const response = await axios.get(`${origin}/dataset/`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
@@ -101,8 +108,7 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-        const baseUrl = new URL(BACKEND_API_URL);
-        const apiUrl = `${baseUrl.origin}/dataset/${datasetId}`;
+        const apiUrl = `${origin}/dataset/${datasetId}`;
 
         await axios.delete(apiUrl, {
           headers: {

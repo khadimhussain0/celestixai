@@ -52,7 +52,7 @@
 import axios from 'axios';
 import NotificationModal from '@/components/NotificationModal.vue';
 import NotificationMixin from '@/mixins/notificationMixin.js';
-import { BACKEND_API_URL } from '../services/config';
+import { origin } from '../services/config';
 
 export default {
   mixins: [NotificationMixin],
@@ -77,8 +77,7 @@ export default {
   methods: {
     async registerUser() {
       try {
-        const baseUrl = new URL(BACKEND_API_URL);
-        const response = await axios.post(`${baseUrl.origin}/user`, this.registerData);
+        const response = await axios.post(`${origin}/user`, this.registerData);
         console.log('User Registration Response:', response.data);
         this.showNotificationModal('success', 'Wellcome Aboard!\n Please Login to continue');
         this.isRegister = false;
@@ -88,7 +87,7 @@ export default {
           email: '',
           password: '',
         };
-        // this.$router.push('/app');
+        this.$router.push('/app');
       } catch (error) {
         console.error('Error creating account:', error.message);
         this.showNotificationModal('error', 'Error creating acccount');
@@ -99,8 +98,7 @@ export default {
         const params = new URLSearchParams();
         params.append('username', this.loginData.email);
         params.append('password', this.loginData.password);
-        const baseUrl = new URL(BACKEND_API_URL);
-        const response = await axios.post(`${baseUrl.origin}/login/`, params, {
+        const response = await axios.post(`${origin}/login/`, params, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
