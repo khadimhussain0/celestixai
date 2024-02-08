@@ -22,6 +22,7 @@ class ModelConstellationCreate(BaseModel):
     parameters: str
     model_class: str
     model_task: str
+    is_vision: bool
 
     class Config:
         orm_mode = True
@@ -37,6 +38,7 @@ class ModelConstellationRead(BaseModel):
     parameters: str
     model_class: str
     model_task: str
+    is_vision: bool
 
     class Config:
         orm_mode = True

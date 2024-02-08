@@ -15,6 +15,7 @@ class ModelCreate(ModelBase):
 class ModelRead(ModelBase):
     id: int
     model_name: str
+    is_vision: bool
     created_date: datetime
     updated_date: datetime
 
@@ -33,6 +34,7 @@ class ModelsRead(BaseModel):
     parameters: str
     model_class: str
     model_task: str
+    is_vision: bool
 
     class Config:
         orm_mode = True

@@ -43,6 +43,7 @@ def create_model(
         parameters=model_metadata.parameters,
         model_class=model_metadata.model_class,
         model_task=model_metadata.model_task,
+        is_vision=model_metadata.is_vision
     )
     db.add(model_db)
     db.commit()

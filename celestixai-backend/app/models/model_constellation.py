@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Integer
+from sqlalchemy import Column, String, DateTime, Integer, Boolean
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from datetime import datetime
@@ -17,6 +17,7 @@ class ModelConstellation(Base):
     model_class = Column(String, nullable=True, server_default=None)
     model_task = Column(String, nullable=True)
     file_size = Column(Integer)
+    is_vision = Column(Boolean, default=False)
     created_date = Column(DateTime, default=datetime.utcnow)
     updated_date = Column(DateTime, default=datetime.utcnow)
 

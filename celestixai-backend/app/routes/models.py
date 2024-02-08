@@ -48,6 +48,7 @@ def get_models(db: Session = Depends(get_db), current_user=Depends(get_current_u
         db.query(Model.id, Model.parameters, Model.model_name,
                  ModelConstellation.model_class,
                  ModelConstellation.model_task,
+                 ModelConstellation.is_vision,
                  ModelConstellation.icon_uuid, ModelConstellation.uuid,
                  ModelConstellation.icon_filename, ModelConstellation.filename)
         .join(ModelConstellation, ModelConstellation.id == Model.model_constellation_id)

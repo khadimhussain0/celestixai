@@ -19,6 +19,7 @@ class Model(Base):
     train = Column(Boolean, nullable=True)
     model_name = Column(String, index=True)
     parameters = Column(String, index=True)
+    is_vision = Column(Boolean, default=False)
 
     created_date = Column(DateTime, default=datetime.utcnow)
     updated_date = Column(DateTime, default=datetime.utcnow)

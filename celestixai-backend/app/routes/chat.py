@@ -4,11 +4,9 @@ from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.chat import Chat
 from app.schemas.chat import ChatMessage, ChatRequest
-import uuid
-from typing import List
+import time
 import json
-import datetime
-from pytz import utc
+
 
 router = APIRouter(
     prefix="/chat",
@@ -33,7 +31,7 @@ def create_new_chat(
     db.commit()
     db.refresh(chat)
 
-    return {"message": "chat added"}
+    return {"message": "chat added", "status_code":200}
 
 
 @router.post("/")
@@ -84,7 +82,7 @@ def chat(
     assistant_message = ChatMessage(
         role="assistant",
         content=model_response["response"]["content"],
-        message_id=str(uuid.uuid4())
+        message_id=int(time.time() * 1000)
     )
 
     chat_messages["messages"].append(assistant_message.dict())
