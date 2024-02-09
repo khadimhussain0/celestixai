@@ -1,14 +1,11 @@
 <template>
   <div class="chat-container">
-    <div class="model-selection">
-      <label for="modelDropdown" class="dropdown-label">Select Model:</label>
-      <div class="custom-dropdown">
-        <select id="modelDropdown" v-model="selectedModel" @change="changeModel" @click="fetchModelData" class="dropdown">
-          <option v-for="model in models" :value="model" :key="model.id">{{ model.model_name }}</option>
+    <div class="chat-app">
+      <div class="recent-chats">
+        <button @click="createNewChat" class="new-chat-btn">New Chat</button>
+        <select id="chatDropdown" v-model="selectedChat" @change="changeChat" @click="fetchChats" class="dropdown">
+          <option v-for="chat in recentChats" :value="chat" :key="chat.chat_id">{{ chat.chat_title }}</option>
         </select>
-        <div class="dropdown-icon">
-          <i class="fas fa-chevron-down"></i>
-        </div>
       </div>
     </div>
 
@@ -22,12 +19,18 @@
       </div>
 
       <div class="user-input">
+        <div class="custom-dropdown">
+          <select id="modelDropdown" v-model="selectedModel" @change="changeModel" @click="fetchModelData"
+            class="dropdown">
+            <option v-for="model in models" :value="model" :key="model.id">{{ model.model_name }}</option>
+          </select>
+        </div>
         <label v-if="isVisionModel" for="imageUpload" class="attachment-icon">
           🖼️
         </label>
         <input id="imageUpload" v-if="isVisionModel" type="file" @change="onImageChange" accept="image/*" />
         <input v-model="userInput.text" @keyup.enter="sendMessage" placeholder="Type your message..." />
-        <button @click="sendMessage">Send</button>
+        <button class="send-btn" @click="sendMessage">Send</button>
       </div>
     </div>
   </div>
@@ -40,7 +43,7 @@ import axios from "axios";
 import Spinner from "@/components/Spinner.vue"
 import NotificationModal from '@/components/NotificationModal.vue';
 import NotificationMixin from '@/mixins/notificationMixin.js';
-import {origin} from "@/services/config";
+import { origin } from "@/services/config";
 
 export default {
   mixins: [NotificationMixin],
@@ -49,6 +52,36 @@ export default {
   },
   data() {
     return {
+      recentChats: [{
+        model: "string",
+        model_id: 0,
+        timestamp: 0,
+        chat_id: 0,
+        chat_title: "string",
+        messages: [
+          {
+            message_id: 0,
+            role: "string",
+            content: "string",
+            images: []
+          }
+        ]
+      }, {
+        model: "string",
+        model_id: 0,
+        timestamp: 0,
+        chat_id: 0,
+        chat_title: "string",
+        messages: [
+          {
+            message_id: 0,
+            role: "string",
+            content: "string",
+            images: []
+          }
+        ]
+      }],
+      selectedChat: null,
       showNotification: false,
       notificationMessage: '',
       notificationType: 'info',
@@ -57,7 +90,6 @@ export default {
         { name: 'Model A', id: 1, is_vision: true },
         { name: 'Model B', id: 2, is_vision: false },
         { name: 'Model C', id: 3, is_vision: true },
-        // Add more models as needed
       ],
       selectedModel: null,
       userInput: {
@@ -74,9 +106,31 @@ export default {
   },
   methods: {
     changeModel() {
-      // Print all data of the selected model in the console
       if (this.selectedModel) {
         console.log("Selected Model Data:", this.selectedModel);
+      }
+    },
+    changeChat(){
+      if (this.selectedChat){
+        console.log(this.selectedChat)
+      }
+    },
+    async fetchChats(){
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          console.error('Access token not found. Please authenticate first.');
+          return;
+        }
+        const response = await axios.get(`${origin}/chat`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+        console.log(response.data)
+        this.recentChats = response.data;
+      } catch (error) {
+        console.error('Failed to fetch model data', error);
       }
     },
     async fetchModelData() {
@@ -98,7 +152,7 @@ export default {
       }
     },
     sendMessage() {
-      if (!this.selectedModel){
+      if (!this.selectedModel) {
         this.showNotificationModal('error', 'Please select a model to chat');
         return
       }
@@ -106,11 +160,8 @@ export default {
       // Add user message to the chat
       this.messages.push({ id: Date.now(), text: this.userInput.text, image: this.userInput.image, isUser: true });
 
-      // Simulate model response (replace this with actual LLM interaction)
       const modelResponse = 'This is a model response.';
       this.messages.push({ id: Date.now() + 1, text: modelResponse, isUser: false });
-
-      // Clear user input
       this.userInput.text = '';
       this.userInput.image = null;
 
@@ -133,13 +184,40 @@ export default {
   
 
 <style scoped>
+.chat-app {
+  position: right;
+}
+
+.recent-chats {
+  margin-bottom: 20px;
+  border: 0px solid #ccc;
+}
+
+.new-chat-btn {
+  padding: 12px;
+  margin-right: 10px;
+  background: linear-gradient(90deg, #8A75D2 , #BD6A97, #D2667A);
+  color:#333;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 .chat-container {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.chat-container {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  max-width: 600px;
+  max-width: 1000px;
   margin: auto;
   padding: 20px;
-  border: 1px solid #ccc;
+  border: 1px solid ;
+  border-color: linear-gradient(90deg, #8A75D2 , #BD6A97, #D2667A);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -165,63 +243,42 @@ select {
 .custom-dropdown {
   position: relative;
   display: inline-block;
+  padding: 10px;
 }
 
-/* Styling for the dropdown */
 .dropdown {
-  padding: 10px;
   font-size: 16px;
   border: none;
   border-radius: 8px;
-  background-color: #fff;
+  padding: 12px;
+  background: linear-gradient(90deg, #8A75D2 , #BD6A97, #D2667A);
   color: #333;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   cursor: pointer;
-  width: 200px; /* Adjust width as needed */
+  width: 100px;
   outline: none;
 }
-
-/* Styling for the dropdown icon */
-.dropdown-icon {
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-}
-
-/* Styling for the dropdown arrow */
-.dropdown-icon i {
-  color: #666;
-  transition: transform 0.3s ease;
-}
-
-/* Rotate the arrow on hover */
 .custom-dropdown:hover .dropdown-icon i {
   transform: translateY(-50%) rotate(180deg);
 }
-
-/* Additional styling for the dropdown label */
 .dropdown-label {
   margin-right: 10px;
   font-size: 18px;
   color: #666;
 }
-
-/* Custom scrollbar for the dropdown options */
 .dropdown::-webkit-scrollbar {
   width: 8px;
 }
-
 .dropdown::-webkit-scrollbar-thumb {
   background-color: #888;
   border-radius: 4px;
 }
-
 .dropdown::-webkit-scrollbar-track {
   background-color: #f1f1f1;
 }
+
 .chat-window {
   flex-grow: 1;
   overflow-y: auto;
@@ -269,14 +326,14 @@ input {
   margin-right: 10px;
 }
 
-button {
+.send-btn {
   padding: 8px 12px;
-  font-size: 14px;
+  font-size: 16px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #2196F3;
-  color: white;
+  background: linear-gradient(90deg, #8A75D2 , #BD6A97, #D2667A);
+  color:#333;
 }
 
 .attachment-icon {
