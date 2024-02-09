@@ -18,6 +18,15 @@ class ChatRequest(BaseModel):
     messages: List[ChatMessage]
 
 
+class ChatResponse(BaseModel):
+    model: str
+    model_id: int
+    timestamp: int
+    chat_id: int
+    chat_title: str
+    messages: List[ChatMessage]
+
+
 # # Example usage:
 # request_data = {
 #     "model": "model name",

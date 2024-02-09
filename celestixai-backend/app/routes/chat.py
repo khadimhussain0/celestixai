@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.chat import Chat
-from app.schemas.chat import ChatMessage, ChatRequest
+from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse
 import time
 import json
+from typing import List
 
 
 router = APIRouter(
@@ -91,3 +92,22 @@ def chat(
     db.refresh(chat)
 
     return assistant_message
+
+
+@router.get("/", response_model=List[ChatResponse])
+def get_chats(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    chats = db.query(Chat).filter(Chat.user_id == current_user.id).all()
+
+    if not chats:
+        raise HTTPException(status_code=404, detail="Chat not found")
+
+    chats_ = []
+    for chat in chats:
+        chat_messages = json.loads(chat.chat)
+        chat_messages["chat_id"] = chat.id
+        chats_.append(chat_messages)
+
+    return chats_
