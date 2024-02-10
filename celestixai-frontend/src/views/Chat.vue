@@ -134,6 +134,7 @@ export default {
       this.currentChat.model_id = this.selectedModel.id;
       this.currentChat.timestamp = Date.now();
       if (this.userInput.text.trim() === '' && !this.userInput.image) return;
+      this.currentChat.chat_title = this.userInput.text.slice(0, 30);
       // Add user message to the chat
       this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, image: [this.userInput.image], role: "user" });
 
