@@ -3,7 +3,7 @@
     <div class="chat-app">
       <div class="recent-chats">
         <button @click="createNewChat" class="new-chat-btn">New Chat</button>
-        <select id="chatDropdown" v-model="selectedChat" @change="changeChat" @click="fetchChats" class="dropdown">
+        <select id="chatDropdown" v-model="currentChat" @change="changeChat" @click="fetchChats" class="dropdown">
           <option v-for="chat in recentChats" :value="chat" :key="chat.chat_id">{{ chat.chat_title }}</option>
         </select>
       </div>
@@ -11,9 +11,9 @@
 
     <div class="chat-window">
       <div class="chat-messages" ref="chatMessages">
-        <div v-for="message in messages" :key="message.message_id"
+        <div v-for="message in currentChat.messages" :key="message.message_id"
           :class="{ 'user-message': message.role === 'user', 'model-message': message.role === 'assistant' }">
-          <img v-if="message.image" class="message-image" :src="message.image" alt="Attached Image" />
+          <img v-if="message.image && message.image[0]" class="message-image" :src="message.image[0]" alt="Attached Image" />
           <p v-if="message.content" class="message-text">{{ message.content }}</p>
         </div>
       </div>
@@ -53,51 +53,20 @@ export default {
   },
   data() {
     return {
-      recentChats: [{
-        model: "string",
+      recentChats: null,
+      currentChat: {
+        model: "null",
         model_id: 0,
-        timestamp: 0,
+        timestamp: Date.now(),
         chat_id: 0,
-        chat_title: "complete chat",
-        messages: [
-          {
-            message_id: 1,
-            role: "user",
-            content: "string",
-            images: []
-          },
-          {
-            message_id: 2,
-            role: "assistant",
-            content: "string",
-            images: []
-          }
-        ]
-      }, {
-        model: "string",
-        model_id: 0,
-        timestamp: 0,
-        chat_id: 0,
-        chat_title: "string",
-        messages: [
-          {
-            message_id: 1,
-            role: "user",
-            content: "string",
-            images: []
-          }
-        ]
-      }],
-      selectedChat: null,
+        chat_title: "New Chat",
+        messages: []
+      },
       showNotification: false,
       notificationMessage: '',
       notificationType: 'info',
       loading: false,
-      models: [
-        { name: 'Model A', id: 1, is_vision: true },
-        { name: 'Model B', id: 2, is_vision: false },
-        { name: 'Model C', id: 3, is_vision: true },
-      ],
+      models: null,
       selectedModel: null,
       userInput: {
         text: '',
@@ -118,13 +87,8 @@ export default {
       }
     },
     changeChat() {
-      // if (this.selectedChat) {
-      //   console.log(this.selectedChat)
-      //   return
-      // }
       console.log("clicked on a chat")
-      console.log(this.selectedChat)
-      this.messages = this.selectedChat.messages
+      console.log(this.currentChat)
     },
     async fetchChats() {
       try {
@@ -166,15 +130,18 @@ export default {
         this.showNotificationModal('error', 'Please select a model to chat');
         return
       }
+      this.currentChat.model = this.selectedModel.model_name;
+      this.currentChat.model_id = this.selectedModel.id;
+      this.currentChat.timestamp = Date.now();
       if (this.userInput.text.trim() === '' && !this.userInput.image) return;
       // Add user message to the chat
-      this.messages.push({ message_id: Date.now(), content: this.userInput.text, image: this.userInput.image, role: "user" });
+      this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, image: [this.userInput.image], role: "user" });
 
       const modelResponse = 'This is a model response.';
-      this.messages.push({ message_id: Date.now() + 1, content: modelResponse, role: "assistant" });
+      this.currentChat.messages.push({ message_id: Date.now(), content: modelResponse, role: "assistant" });
       this.userInput.text = '';
       this.userInput.image = null;
-      console.log(this.messages)
+      console.log(this.currentChat)
 
       // Scroll to the bottom of the chat window
       this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
