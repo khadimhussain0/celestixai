@@ -28,6 +28,13 @@ class ChatResponse(BaseModel):
     messages: List[ChatMessage]
 
 
+class AssistantChatMessage(BaseModel):
+    chat_id: int
+    message_id: int = int(time.time() * 1000)
+    role: str = "user"
+    content: str
+    images: Optional[List[bytes]] = []
+
 # # Example usage:
 # request_data = {
 #     "model": "model name",

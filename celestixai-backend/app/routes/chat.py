@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.chat import Chat
-from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse
+from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse, AssistantChatMessage
 import time
 import json
 from typing import List
@@ -15,23 +15,7 @@ router = APIRouter(
 )
 
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.core.database import get_db
-from app.core.auth import get_current_user
-from app.models.chat import Chat
-from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse
-import time
-import json
-from typing import List
-
-router = APIRouter(
-    prefix="/chat",
-    tags=["Chat"]
-)
-
-
-@router.post("/")
+@router.post("/", response_model=AssistantChatMessage)
 def chat(
     form_data: ChatRequest,
     current_user=Depends(get_current_user),
@@ -41,6 +25,7 @@ def chat(
 
     # If chat_id is 0 or not provided, create a new chat
     if not chat_id:
+        print("chat id is not present creating a new chat")
         chat = Chat(
             user_id=current_user.id,
             model_name=form_data.model,
@@ -71,13 +56,14 @@ def chat(
         def process_model_output(model_input):
             return {
                 "response": {
-                    "content": "This is model response"
+                    "content": "This is model response from server"
                 }
             }
 
         model_response = process_model_output(model_input)
 
-        assistant_message = ChatMessage(
+        assistant_message = AssistantChatMessage(
+            chat_id=chat.id,
             role="assistant",
             content=model_response["response"]["content"],
             message_id=int(time.time() * 1000)
@@ -91,6 +77,7 @@ def chat(
         return assistant_message
 
     else:
+        print("chat id is provided processing the request")
         # If chat_id is provided, process the existing chat
         chat = db.query(Chat).filter(Chat.id == chat_id).first()
         if not chat:
@@ -120,13 +107,14 @@ def chat(
         def process_model_output(model_input):
             return {
                 "response": {
-                    "content": "This is model response"
+                    "content": "This is model response from server with follow up chat message"
                 }
             }
 
         model_response = process_model_output(model_input)
 
-        assistant_message = ChatMessage(
+        assistant_message = AssistantChatMessage(
+            chat_id=chat.id,
             role="assistant",
             content=model_response["response"]["content"],
             message_id=int(time.time() * 1000)
