@@ -111,3 +111,27 @@ def get_chats(
         chats_.append(chat_messages)
 
     return chats_
+
+
+@router.delete("/delete-all")
+def delete_all_chats(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    db.query(Chat).filter(Chat.user_id == current_user.id).delete()
+    db.commit()
+    return {"message": "All chats deleted successfully"}
+
+
+@router.delete("/{chat_id}")
+def delete_chat_by_id(
+    chat_id: int,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    chat = db.query(Chat).filter(Chat.id == chat_id, Chat.user_id == current_user.id).first()
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    db.delete(chat)
+    db.commit()
+    return {"message": f"Chat with ID {chat_id} deleted successfully"}

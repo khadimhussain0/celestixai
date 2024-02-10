@@ -1,10 +1,11 @@
-from typing import List, Dict, Union, Optional
+from typing import List, Optional
 from pydantic import BaseModel
+import time
 
 
 class ChatMessage(BaseModel):
-    message_id: int
-    role: str
+    message_id: int = int(time.time() * 1000)
+    role: str = "user"
     content: str
     images: Optional[List[bytes]] = []
 
