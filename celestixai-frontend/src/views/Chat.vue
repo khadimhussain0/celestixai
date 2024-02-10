@@ -38,6 +38,7 @@
   </div>
   <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
     @close="hideNotification" />
+    <spinner :loading="loading" />
 </template>
 
 <script>
@@ -50,7 +51,8 @@ import { origin } from "@/services/config";
 export default {
   mixins: [NotificationMixin],
   components: {
-    NotificationModal
+    NotificationModal,
+    Spinner
   },
   data() {
     return {
@@ -127,72 +129,77 @@ export default {
       }
     },
     async sendMessage() {
-  if (!this.selectedModel) {
-    this.showNotificationModal('error', 'Please select a model to chat');
-    return;
-  }
-
-  this.currentChat.model = this.selectedModel.model_name;
-  this.currentChat.model_id = this.selectedModel.id;
-  this.currentChat.timestamp = Date.now();
-
-  if (this.userInput.text.trim() === '' && !this.userInput.image) return;
-
-  if (this.currentChat.chat_id===0){
-  this.currentChat.chat_title = this.userInput.text.slice(0, 30)};
-
-  // Add user message to the chat
-  this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, image: [this.userInput.image], role: "user" });
-
-  // Create a copy of the current chat for sending
-  const chat = { ...this.currentChat };
-  chat.messages = [chat.messages[chat.messages.length - 1]];
-
-  try {
-    const accessToken = localStorage.getItem('accessToken');
-    if (!accessToken) {
-      throw new Error('Access token not found');
-    }
-
-    const response = await axios.post(`${origin}/chat/`, chat, {
-      headers: {
-        'accept': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+      if (!this.selectedModel) {
+        this.showNotificationModal('error', 'Please select a model to chat');
+        return;
       }
-    });
 
-    // Assuming the model response is within the messages content
-    console.log(response.data)
-    const modelResponse = response.data.content;
-    console.log(modelResponse);
-    // Add chat_id to current_chat
-    this.currentChat.chat_id = response.data.chat_id
-    // Add the model response to the chat messages
-    this.currentChat.messages.push({ message_id: response.data.message_id, content: modelResponse, role: "assistant" });
-  } catch (error) {
-    console.error('Error:', error);
-  }
+      this.loading = true
+      this.currentChat.model = this.selectedModel.model_name;
+      this.currentChat.model_id = this.selectedModel.id;
+      this.currentChat.timestamp = Date.now();
 
-  this.userInput.text = '';
-  this.userInput.image = null;
-  console.log(this.currentChat);
+      if (this.userInput.text.trim() === '' && !this.userInput.image) return;
 
-  // Scroll to the bottom of the chat window
-  this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
-},
-      onImageChange(event) {
-        const file = event.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            this.userInput.image = reader.result;
-          };
-          reader.readAsDataURL(file);
+      if (this.currentChat.chat_id === 0) {
+        this.currentChat.chat_title = this.userInput.text.slice(0, 30)
+      };
+
+      // Add user message to the chat
+      this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, image: [this.userInput.image], role: "user" });
+
+      // Create a copy of the current chat for sending
+      const chat = { ...this.currentChat };
+      chat.messages = [chat.messages[chat.messages.length - 1]];
+
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          throw new Error('Access token not found');
         }
-      },
+
+        const response = await axios.post(`${origin}/chat/`, chat, {
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        // Assuming the model response is within the messages content
+        console.log(response.data)
+        const modelResponse = response.data.content;
+        console.log(modelResponse);
+        // Add chat_id to current_chat
+        this.currentChat.chat_id = response.data.chat_id
+        // Add the model response to the chat messages
+        this.currentChat.messages.push({ message_id: response.data.message_id, content: modelResponse, role: "assistant" });
+      } catch (error) {
+        console.error('Error:', error);
+        this.showNotificationModal('error', 'Error generating response');
+      } finally{
+        this.loading=false
+      }
+
+      this.userInput.text = '';
+      this.userInput.image = null;
+      console.log(this.currentChat);
+
+      // Scroll to the bottom of the chat window
+      this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
     },
-  };
+    onImageChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.userInput.image = reader.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+  },
+};
 </script>
   
 
