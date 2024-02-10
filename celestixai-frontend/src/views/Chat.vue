@@ -11,12 +11,13 @@
 
     <div class="chat-window">
       <div class="chat-messages" ref="chatMessages">
-        <div v-for="message in messages" :key="message.id"
-          :class="{ 'user-message': message.isUser, 'model-message': !message.isUser }">
+        <div v-for="message in messages" :key="message.message_id"
+          :class="{ 'user-message': message.role === 'user', 'model-message': message.role === 'assistant' }">
           <img v-if="message.image" class="message-image" :src="message.image" alt="Attached Image" />
-          <p v-if="message.text" class="message-text">{{ message.text }}</p>
+          <p v-if="message.content" class="message-text">{{ message.content }}</p>
         </div>
       </div>
+
 
       <div class="user-input">
         <div class="custom-dropdown">
@@ -57,11 +58,17 @@ export default {
         model_id: 0,
         timestamp: 0,
         chat_id: 0,
-        chat_title: "string",
+        chat_title: "complete chat",
         messages: [
           {
-            message_id: 0,
-            role: "string",
+            message_id: 1,
+            role: "user",
+            content: "string",
+            images: []
+          },
+          {
+            message_id: 2,
+            role: "assistant",
             content: "string",
             images: []
           }
@@ -74,8 +81,8 @@ export default {
         chat_title: "string",
         messages: [
           {
-            message_id: 0,
-            role: "string",
+            message_id: 1,
+            role: "user",
             content: "string",
             images: []
           }
@@ -110,12 +117,16 @@ export default {
         console.log("Selected Model Data:", this.selectedModel);
       }
     },
-    changeChat(){
-      if (this.selectedChat){
-        console.log(this.selectedChat)
-      }
+    changeChat() {
+      // if (this.selectedChat) {
+      //   console.log(this.selectedChat)
+      //   return
+      // }
+      console.log("clicked on a chat")
+      console.log(this.selectedChat)
+      this.messages = this.selectedChat.messages
     },
-    async fetchChats(){
+    async fetchChats() {
       try {
         const accessToken = localStorage.getItem('accessToken');
         if (!accessToken) {
@@ -127,7 +138,6 @@ export default {
             'Authorization': `Bearer ${accessToken}`,
           },
         });
-        console.log(response.data)
         this.recentChats = response.data;
       } catch (error) {
         console.error('Failed to fetch model data', error);
@@ -158,12 +168,13 @@ export default {
       }
       if (this.userInput.text.trim() === '' && !this.userInput.image) return;
       // Add user message to the chat
-      this.messages.push({ id: Date.now(), text: this.userInput.text, image: this.userInput.image, isUser: true });
+      this.messages.push({ message_id: Date.now(), content: this.userInput.text, image: this.userInput.image, role: "user" });
 
       const modelResponse = 'This is a model response.';
-      this.messages.push({ id: Date.now() + 1, text: modelResponse, isUser: false });
+      this.messages.push({ message_id: Date.now() + 1, content: modelResponse, role: "assistant" });
       this.userInput.text = '';
       this.userInput.image = null;
+      console.log(this.messages)
 
       // Scroll to the bottom of the chat window
       this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
@@ -196,8 +207,8 @@ export default {
 .new-chat-btn {
   padding: 12px;
   margin-right: 10px;
-  background: linear-gradient(90deg, #8A75D2 , #BD6A97, #D2667A);
-  color:#333;
+  background: linear-gradient(90deg, #8A75D2, #BD6A97, #D2667A);
+  color: #333;
   font-size: 16px;
   border: none;
   border-radius: 5px;
@@ -216,8 +227,8 @@ export default {
   max-width: 1000px;
   margin: auto;
   padding: 20px;
-  border: 1px solid ;
-  border-color: linear-gradient(90deg, #8A75D2 , #BD6A97, #D2667A);
+  border: 1px solid;
+  border-color: linear-gradient(90deg, #8A75D2, #BD6A97, #D2667A);
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
@@ -251,7 +262,7 @@ select {
   border: none;
   border-radius: 8px;
   padding: 12px;
-  background: linear-gradient(90deg, #8A75D2 , #BD6A97, #D2667A);
+  background: linear-gradient(90deg, #8A75D2, #BD6A97, #D2667A);
   color: #333;
   appearance: none;
   -webkit-appearance: none;
@@ -260,21 +271,26 @@ select {
   width: 100px;
   outline: none;
 }
+
 .custom-dropdown:hover .dropdown-icon i {
   transform: translateY(-50%) rotate(180deg);
 }
+
 .dropdown-label {
   margin-right: 10px;
   font-size: 18px;
   color: #666;
 }
+
 .dropdown::-webkit-scrollbar {
   width: 8px;
 }
+
 .dropdown::-webkit-scrollbar-thumb {
   background-color: #888;
   border-radius: 4px;
 }
+
 .dropdown::-webkit-scrollbar-track {
   background-color: #f1f1f1;
 }
@@ -332,8 +348,8 @@ input {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background: linear-gradient(90deg, #8A75D2 , #BD6A97, #D2667A);
-  color:#333;
+  background: linear-gradient(90deg, #8A75D2, #BD6A97, #D2667A);
+  color: #333;
 }
 
 .attachment-icon {
@@ -356,5 +372,4 @@ input {
 
 .message-text {
   margin-top: 5px;
-}
-</style>
+}</style>
