@@ -38,7 +38,7 @@
   </div>
   <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
     @close="hideNotification" />
-    <spinner :loading="loading" />
+  <spinner :loading="loading" />
 </template>
 
 <script>
@@ -107,7 +107,7 @@ export default {
         });
         this.recentChats = response.data;
       } catch (error) {
-        console.error('Failed to fetch model data', error);
+        console.error('Failed to fetch recent chats', error);
       }
     },
     async fetchModelData() {
@@ -147,7 +147,8 @@ export default {
 
       // Add user message to the chat
       this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, image: [this.userInput.image], role: "user" });
-
+      this.userInput.text = '';
+      this.userInput.image = null;
       // Create a copy of the current chat for sending
       const chat = { ...this.currentChat };
       chat.messages = [chat.messages[chat.messages.length - 1]];
@@ -177,16 +178,23 @@ export default {
       } catch (error) {
         console.error('Error:', error);
         this.showNotificationModal('error', 'Error generating response');
-      } finally{
-        this.loading=false
+      } finally {
+        this.loading = false
       }
-
-      this.userInput.text = '';
-      this.userInput.image = null;
       console.log(this.currentChat);
 
       // Scroll to the bottom of the chat window
       this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
+    },
+    createNewChat(){
+      this.currentChat = {
+        model: "null",
+        model_id: 0,
+        timestamp: Date.now(),
+        chat_id: 0,
+        chat_title: "New Chat",
+        messages: []
+      }
     },
     onImageChange(event) {
       const file = event.target.files[0];
