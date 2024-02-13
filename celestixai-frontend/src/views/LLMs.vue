@@ -12,8 +12,11 @@
       </div>
     </div>
     <div class="button-container">
-      <div class="finetune-btn">
-        <input type="button" value="Fine Tune">
+      <div class="finetune-btn" :class="{ 'finetune-in-progress': isFineTuning && model.id === fineTuningModelId }">
+        <input type="button" value="Fine Tune" @click="startFineTuning(model)">
+        <div class="progress-bar" v-if="isFineTuning && model.id === fineTuningModelId">
+          <div class="progress" :style="{ width: fineTuneProgress + '%' }"></div>
+        </div>
       </div>
       <div class="config-btn">
         <input type="button" value="Config" @click="openConfigModal(model)">
@@ -25,9 +28,9 @@
     <!-- Include the ChangeConfigModel component -->
     <change-config-model v-if="showConfigModal" :model="selectedModel" @config-changed="handleConfigChanged"
      @close="closeConfigModal"/>
-          <!-- Use NotificationModal component -->
-          <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
-        @close="hideNotification" />
+    <!-- Use NotificationModal component -->
+    <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
+      @close="hideNotification" />
   </div>
 </template>
 
@@ -42,16 +45,24 @@ export default {
   mixins: [NotificationMixin],
   data() {
     return {
+      showNotification: false,
+      notificationMessage: '',
+      notificationType: 'info',
       modelData: [],
       showConfigModal: false,
       selectedModel: null,
       showNotification: false,
       notificationMessage: '',
-      notificationType: 'info', 
+      notificationType: 'info',
+      isFineTuning: false,
+      fineTuningModelId: null,
+      fineTuneProgress: 0,
+      fineTuneInterval: null,
     };
   },
   components: {
     ChangeConfigModel,
+    NotificationModal
   },
   methods: {
     async fetchModelData() {
@@ -80,10 +91,28 @@ export default {
       this.showConfigModal = false;
     },
     handleConfigChanged({ type, message }) {
-      // Handle the config change event, show notification
       this.showNotificationModal(type, message);
       this.showConfigModal = false;
       this.fetchModelData();
+    },
+    startFineTuning(model) {
+      // Start fine tuning process for the selected model
+      if (this.isFineTuning){
+        this.showNotificationModal("info", "Can't Start a new fine tuning job\n One Job is already in progress");
+        return
+      }
+      this.isFineTuning = true;
+      this.fineTuningModelId = model.id;
+      this.fineTuneProgress = 0;
+      this.fineTuneInterval = setInterval(() => {
+        this.fineTuneProgress += 1;
+        if (this.fineTuneProgress >= 100) {
+          clearInterval(this.fineTuneInterval);
+          this.isFineTuning = false;
+          this.fineTuningModelId = null;
+          this.showNotificationModal('success', 'Fine tuning completed successfully.');
+        }
+      }, 100);
     },
   },
   mounted() {
@@ -103,12 +132,10 @@ export default {
   margin-bottom: 10px;
   border-radius: 8px;
   transition: background-color 0.5s ease;
-  /* Smooth transition */
 }
 
 .model-card:hover {
   background: linear-gradient(360deg, #90b9f6 , #92f879);
-  /* Gradient background on hover */
 }
 
 .model-icon {
@@ -203,5 +230,28 @@ export default {
   filter: blur(20px);
   opacity: 1;
   animation: animate 8s linear infinite;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background-color: #07a8f4;
+  transition: width 0.2s ease;
+}
+
+.finetune-in-progress input {
+  cursor: not-allowed;
+}
+
+.finetune-in-progress input:hover {
+  background-color: #bbb;
 }
 </style>
