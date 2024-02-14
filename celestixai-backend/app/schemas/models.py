@@ -14,7 +14,7 @@ class ModelCreate(ModelBase):
 
 class ModelRead(ModelBase):
     id: int
-    model_name: str
+    custom_name: str
     is_vision: bool
     created_date: datetime
     updated_date: datetime
@@ -29,7 +29,7 @@ class ModelsRead(BaseModel):
     uuid: str
     icon_uuid: str
     icon_filename: str
-    model_name: str
+    custom_name: str
     filename: str
     parameters: str
     model_class: str

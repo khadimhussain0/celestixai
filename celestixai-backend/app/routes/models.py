@@ -33,6 +33,7 @@ def create_model(
         model_constellation_id=model_constellation_id.get("id"),
         fine_tuned_model_path=None,
         model_name=model_constellation.model_name,
+        custom_name=model_constellation.model_name,
         parameters=model_constellation.parameters,
         is_vision=model_constellation.is_vision
     )
@@ -46,7 +47,7 @@ def create_model(
 @router.get("/", response_model=List[ModelsRead])
 def get_models(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
     models = (
-        db.query(Model.id, Model.parameters, Model.model_name,
+        db.query(Model.id, Model.parameters, Model.custom_name,
                  ModelConstellation.model_class,
                  ModelConstellation.model_task,
                  ModelConstellation.is_vision,
@@ -76,7 +77,7 @@ def update_model(
         raise HTTPException(status_code=404, detail="Model not found")
 
     if model_update.model_name:
-        model_db.model_name = model_update.model_name
+        model_db.custom_name = model_update.model_name
 
     db.commit()
     db.refresh(model_db)

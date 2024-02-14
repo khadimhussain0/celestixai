@@ -5,6 +5,7 @@ from app.core.auth import get_current_user
 from app.models.chat import Chat
 from app.models.models import Model
 from app.schemas.chat import ChatRequest, ChatResponse, AssistantChatMessage
+from app.utils.preprocess_chat_messages import base64_to_bytes
 import time
 import json
 from typing import List
@@ -22,12 +23,11 @@ def chat(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    is_vision=db.query(Model.is_vision).filter(Model.id == form_data.model_id).first()
+    is_vision = db.query(Model.is_vision).filter(Model.id == form_data.model_id).first()
     chat_id = form_data.chat_id
     start = time.time()
     # If chat_id is 0 or not provided, create a new chat
     if not chat_id:
-        print("chat id is not present creating a new chat")
         chat = Chat(
             user_id=current_user.id,
             model_name=form_data.model,
@@ -41,12 +41,14 @@ def chat(
         # Read the newly created chat content
         chat_messages = json.loads(chat.chat)
         messages = chat_messages["messages"]
-
+        print(is_vision)
         modified_messages = []
         for message in messages:
             modified_message = message.copy()
             modified_message.pop('message_id')
-            if is_vision:
+            modified_message["images"]=[base64_to_bytes(modified_message["images"][0])]
+            if not is_vision:
+                print("running pop")
                 modified_message.pop("images")
             modified_messages.append(modified_message)
 
@@ -74,7 +76,6 @@ def chat(
         return assistant_message
 
     else:
-        print("chat id is provided processing the request")
         # If chat_id is provided, process the existing chat
         chat = db.query(Chat).filter(Chat.id == chat_id).first()
         if not chat:
@@ -88,12 +89,13 @@ def chat(
         db.refresh(chat)
 
         messages = chat_messages["messages"]
-
+        print(is_vision)
         modified_messages = []
         for message in messages:
             modified_message = message.copy()
             modified_message.pop('message_id')
-            if is_vision:
+            modified_message["images"]=[base64_to_bytes(modified_message["images"][0])]
+            if not is_vision:
                 modified_message.pop("images")
             modified_messages.append(modified_message)
 

@@ -20,6 +20,7 @@ class Model(Base):
     model_name = Column(String, index=True)
     parameters = Column(String, index=True)
     is_vision = Column(Boolean, default=False)
+    custom_name = Column(String, nullable=False)
 
     created_date = Column(DateTime, default=datetime.utcnow)
     updated_date = Column(DateTime, default=datetime.utcnow)
