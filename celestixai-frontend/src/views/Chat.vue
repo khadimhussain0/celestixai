@@ -146,15 +146,11 @@ export default {
       };
 
       // Add user message to the chat
-      let image 
-      if (this.userInput.image==null){
-        image = []
-      }else{
-        image = [this.userInput.image]
-      }
-      this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, images: image, role: "user" });
-      this.userInput.text = '';
+
+      this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, images: this.userInput.image ? [this.userInput.image] : [], role: "user" });
       this.userInput.image = null;
+      this.userInput.text = '';
+
       // Create a copy of the current chat for sending
       const chat = { ...this.currentChat };
       chat.messages = [chat.messages[chat.messages.length - 1]];
@@ -174,9 +170,7 @@ export default {
         });
 
         // Assuming the model response is within the messages content
-        console.log(response.data)
         const modelResponse = response.data.content;
-        console.log(modelResponse);
         // Add chat_id to current_chat
         this.currentChat.chat_id = response.data.chat_id
         // Add the model response to the chat messages
@@ -187,8 +181,6 @@ export default {
       } finally {
         this.loading = false
       }
-      console.log(this.currentChat);
-
       // Scroll to the bottom of the chat window
       this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
     },
