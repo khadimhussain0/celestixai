@@ -4,7 +4,7 @@
     <div class="model-info-container">
       <img src="https://picsum.photos/200" alt="Model Icon" class="model-icon" />
       <div class="model-info">
-        <div class="model-name">Model Name: {{ model.model_name }}</div>
+        <div class="model-name">Model Name: {{ model.custom_name }}</div>
         <div class="model-parameters">Parameters: {{ model.parameters }}</div>
         <div class="model-is_vision">Vision: {{ model.is_vision ? "Supported" : "Not supported" }}</div>
         <div class="model-class">Model Class: {{ model.model_class }}</div>
