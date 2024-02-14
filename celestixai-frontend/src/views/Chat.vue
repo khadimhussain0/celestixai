@@ -13,7 +13,7 @@
       <div class="chat-messages" ref="chatMessages">
         <div v-for="message in currentChat.messages" :key="message.message_id"
           :class="{ 'user-message': message.role === 'user', 'model-message': message.role === 'assistant' }">
-          <img v-if="message.image && message.image[0]" class="message-image" :src="message.image[0]"
+          <img v-if="message.images && message.images[0]" class="message-image" :src="message.images[0]"
             alt="Attached Image" />
           <p v-if="message.content" class="message-text">{{ message.content }}</p>
         </div>
@@ -146,7 +146,13 @@ export default {
       };
 
       // Add user message to the chat
-      this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, image: [this.userInput.image], role: "user" });
+      let image 
+      if (this.userInput.image==null){
+        image = []
+      }else{
+        image = [this.userInput.image]
+      }
+      this.currentChat.messages.push({ message_id: Date.now(), content: this.userInput.text, images: image, role: "user" });
       this.userInput.text = '';
       this.userInput.image = null;
       // Create a copy of the current chat for sending
