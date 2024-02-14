@@ -7,7 +7,7 @@ class ChatMessage(BaseModel):
     message_id: int = int(time.time() * 1000)
     role: str = "user"
     content: str
-    images: Optional[List[bytes]] = []
+    images: Optional[List[str]] = []
 
 
 class ChatRequest(BaseModel):
@@ -33,7 +33,7 @@ class AssistantChatMessage(BaseModel):
     message_id: int = int(time.time() * 1000)
     role: str = "user"
     content: str
-    images: Optional[List[bytes]] = []
+    images: Optional[List[str]] = []
 
 # # Example usage:
 # request_data = {

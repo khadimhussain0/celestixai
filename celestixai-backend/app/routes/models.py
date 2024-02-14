@@ -33,7 +33,8 @@ def create_model(
         model_constellation_id=model_constellation_id.get("id"),
         fine_tuned_model_path=None,
         model_name=model_constellation.model_name,
-        parameters=model_constellation.parameters
+        parameters=model_constellation.parameters,
+        is_vision=model_constellation.is_vision
     )
     db.add(model_db)
     db.commit()

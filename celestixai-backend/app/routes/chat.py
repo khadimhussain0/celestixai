@@ -3,11 +3,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.chat import Chat
-from app.schemas.chat import ChatMessage, ChatRequest, ChatResponse, AssistantChatMessage
+from app.models.models import Model
+from app.schemas.chat import ChatRequest, ChatResponse, AssistantChatMessage
 import time
 import json
 from typing import List
-
+import ollama
 
 router = APIRouter(
     prefix="/chat",
@@ -21,8 +22,9 @@ def chat(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    is_vision=db.query(Model.is_vision).filter(Model.id == form_data.model_id).first()
     chat_id = form_data.chat_id
-
+    start = time.time()
     # If chat_id is 0 or not provided, create a new chat
     if not chat_id:
         print("chat id is not present creating a new chat")
@@ -36,7 +38,6 @@ def chat(
         db.add(chat)
         db.commit()
         db.refresh(chat)
-
         # Read the newly created chat content
         chat_messages = json.loads(chat.chat)
         messages = chat_messages["messages"]
@@ -45,29 +46,25 @@ def chat(
         for message in messages:
             modified_message = message.copy()
             modified_message.pop('message_id')
+            if is_vision:
+                modified_message.pop("images")
             modified_messages.append(modified_message)
 
-        model_input = {
-            "model": form_data.model,
-            "messages": modified_messages
-        }
-
         # Stub function to process model output
-        def process_model_output(model_input):
-            return {
-                "response": {
-                    "content": "This is model response from server"
-                }
-            }
+        def process_model_output():
+            response = ollama.chat(model="tinyllama",
+            messages= modified_messages)
+            return (response['message']['content'])
 
-        model_response = process_model_output(model_input)
+        model_response = process_model_output()
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
             role="assistant",
-            content=model_response["response"]["content"],
+            content=model_response,
             message_id=int(time.time() * 1000)
         )
+
 
         chat_messages["messages"].append(assistant_message.dict())
         chat.chat = json.dumps(chat_messages)
@@ -96,27 +93,28 @@ def chat(
         for message in messages:
             modified_message = message.copy()
             modified_message.pop('message_id')
+            if is_vision:
+                modified_message.pop("images")
             modified_messages.append(modified_message)
 
+
         model_input = {
-            "model": form_data.model,
+            "model": "tinyllama",
             "messages": modified_messages
         }
 
         # Stub function to process model output
         def process_model_output(model_input):
-            return {
-                "response": {
-                    "content": "This is model response from server with follow up chat message"
-                }
-            }
+            response = ollama.chat(model= "tinyllama",
+            messages= modified_messages)
+            return (response['message']['content'])
 
         model_response = process_model_output(model_input)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
             role="assistant",
-            content=model_response["response"]["content"],
+            content=model_response,
             message_id=int(time.time() * 1000)
         )
 
@@ -125,6 +123,7 @@ def chat(
         db.commit()
         db.refresh(chat)
 
+        print("Took (s): ", time.time()-start)
         return assistant_message
 
 
