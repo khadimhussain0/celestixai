@@ -4,6 +4,7 @@ from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.chat import Chat
 from app.models.models import Model
+from app.models.model_constellation import ModelConstellation
 from app.schemas.chat import ChatRequest, ChatResponse, AssistantChatMessage
 from app.utils.preprocess_chat_messages import base64_to_bytes
 import time
@@ -23,7 +24,12 @@ def chat(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    is_vision = db.query(Model.is_vision).filter(Model.id == form_data.model_id).first()
+    models_metadata = db.query(Model.id,
+                 ModelConstellation.is_vision,
+                 ModelConstellation.ollama_name).join(
+                     ModelConstellation, ModelConstellation.id == Model.model_constellation_id
+                     ).filter(Model.id == form_data.model_id).first()
+
     chat_id = form_data.chat_id
     start = time.time()
     # If chat_id is 0 or not provided, create a new chat
@@ -41,20 +47,21 @@ def chat(
         # Read the newly created chat content
         chat_messages = json.loads(chat.chat)
         messages = chat_messages["messages"]
-        print(is_vision)
         modified_messages = []
         for message in messages:
             modified_message = message.copy()
             modified_message.pop('message_id')
-            modified_message["images"]=[base64_to_bytes(modified_message["images"][0])]
-            if not is_vision:
-                print("running pop")
+            try:
+                modified_message["images"]=[base64_to_bytes(modified_message["images"][0])]
+            except Exception as e:
+                print(f"Exception occured: {e}")
+            if not models_metadata.is_vision:
                 modified_message.pop("images")
             modified_messages.append(modified_message)
 
         # Stub function to process model output
         def process_model_output():
-            response = ollama.chat(model="tinyllama",
+            response = ollama.chat(model="tinyllama:1.1b-chat-v1-q4_0",
             messages= modified_messages)
             return (response['message']['content'])
 
@@ -89,25 +96,27 @@ def chat(
         db.refresh(chat)
 
         messages = chat_messages["messages"]
-        print(is_vision)
         modified_messages = []
         for message in messages:
             modified_message = message.copy()
             modified_message.pop('message_id')
-            modified_message["images"]=[base64_to_bytes(modified_message["images"][0])]
-            if not is_vision:
+            try:
+                modified_message["images"]=[base64_to_bytes(modified_message["images"][0])]
+            except Exception as e:
+                print(f"Exception occured: {e}")
+            if not models_metadata.is_vision:
                 modified_message.pop("images")
             modified_messages.append(modified_message)
 
 
         model_input = {
-            "model": "tinyllama",
+            "model": "tinyllama:1.1b-chat-v1-q4_0",
             "messages": modified_messages
         }
 
         # Stub function to process model output
         def process_model_output(model_input):
-            response = ollama.chat(model= "tinyllama",
+            response = ollama.chat(model= "tinyllama:1.1b-chat-v1-q4_0",
             messages= modified_messages)
             return (response['message']['content'])
 

@@ -36,6 +36,8 @@ def create_model(
     model_db = ModelConstellation(
         uuid=model_uuid,
         model_name=model_metadata.model_name,
+        ollama_name=model_metadata.ollama_name,
+        hf_id=model_metadata.hf_id,
         icon_uuid=icon_uuid,
         icon_filename=icon_file.filename,
         filename=model_file.filename,

@@ -19,6 +19,8 @@ class ModelConstellation(BaseModel):
 @as_form
 class ModelConstellationCreate(BaseModel):
     model_name: str
+    ollama_name: str
+    hf_id: str
     parameters: str
     model_class: str
     model_task: str
