@@ -21,6 +21,7 @@ class Model(Base):
     parameters = Column(String, index=True)
     is_vision = Column(Boolean, default=False)
     custom_name = Column(String, nullable=False)
+    deploy = Column(Boolean, default=False)
 
     created_date = Column(DateTime, default=datetime.utcnow)
     updated_date = Column(DateTime, default=datetime.utcnow)

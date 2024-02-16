@@ -29,6 +29,8 @@ def create_model(
         raise HTTPException(status_code=404, detail="Model Constellation not found")
 
     model_db = Model(
+        uuid=model_constellation.uuid,
+        filename=model_constellation.filename,
         user_id=current_user.id,
         model_constellation_id=model_constellation_id.get("id"),
         fine_tuned_model_path=None,
