@@ -24,7 +24,7 @@
         <div class="custom-dropdown">
           <select id="modelDropdown" v-model="selectedModel" @change="changeModel" @click="fetchModelData"
             class="dropdown">
-            <option v-for="model in models" :value="model" :key="model.id">{{ model.model_name }}</option>
+            <option v-for="model in models" :value="model" :key="model.id">{{ model.custom_name }}</option>
           </select>
         </div>
         <label v-if="isVisionModel" for="imageUpload" class="attachment-icon">
@@ -62,7 +62,7 @@ export default {
         model_id: 0,
         timestamp: Date.now(),
         chat_id: 0,
-        chat_title: "New Chat",
+        chat_title: "Select Recent Chats",
         messages: []
       },
       showNotification: false,
@@ -94,6 +94,7 @@ export default {
       console.log(this.currentChat)
     },
     async fetchChats() {
+      console.log("fetchchats")
       try {
         const accessToken = localStorage.getItem('accessToken');
         if (!accessToken) {
@@ -106,7 +107,10 @@ export default {
           },
         });
         this.recentChats = response.data;
+        this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
+        return response.data
       } catch (error) {
+        this.showNotificationModal("error", "Could not load recent chats")
         console.error('Failed to fetch recent chats', error);
       }
     },
@@ -117,14 +121,16 @@ export default {
           console.error('Access token not found. Please authenticate first.');
           return;
         }
-        const response = await axios.get(`${origin}/model_constellation/`, {
+        const response = await axios.get(`${origin}/models/`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
         });
 
         this.models = response.data;
+        return response.data
       } catch (error) {
+        this.showNotificationModal("error", "Could not load models please try again")
         console.error('Failed to fetch model data', error);
       }
     },
@@ -135,7 +141,7 @@ export default {
       }
 
       this.loading = true
-      this.currentChat.model = this.selectedModel.model_name;
+      this.currentChat.model = this.selectedModel.custom_name;
       this.currentChat.model_id = this.selectedModel.id;
       this.currentChat.timestamp = Date.now();
 
@@ -184,7 +190,7 @@ export default {
       // Scroll to the bottom of the chat window
       this.$refs.chatMessages.scrollTop = this.$refs.chatMessages.scrollHeight;
     },
-    createNewChat(){
+    createNewChat() {
       this.currentChat = {
         model: "null",
         model_id: 0,
@@ -204,6 +210,29 @@ export default {
         reader.readAsDataURL(file);
       }
     },
+  },
+  mounted() {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      this.isLoggedIn = true;
+    } else {
+      this.isLoggedIn = false;
+    }
+    this.fetchChats().then(recentChats => {
+      if (this.currentChat != null && recentChats.length > 0) {
+        console.log(this.currentChat)
+        this.recentChats = [this.currentChat, ...this.recentChats]
+        this.currentChat = recentChats[0];
+      }
+    });
+
+    this.fetchModelData().then(models=>{
+      console.log(models)
+      if (models.length>0){
+        console.log("if running")
+        this.selectedModel= models[0]
+      }
+    });
   },
 };
 </script>
@@ -256,6 +285,15 @@ label {
   font-size: 16px;
   margin-right: 10px;
   color: #333;
+}
+
+.select-chats {
+  margin-top: 20px;
+}
+
+.multi-select {
+  width: 200px;
+  height: 150px;
 }
 
 select {
