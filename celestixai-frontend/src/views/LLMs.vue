@@ -22,7 +22,7 @@
         <input type="button" value="Config" @click="openConfigModal(model)">
       </div>
       <div class="config-btn">
-        <input type="button" value="Deploy">
+        <input type="button" value="Deploy" @click="deployModel(model)">
       </div>
     </div>
     <!-- Include the ChangeConfigModel component -->
@@ -81,6 +81,7 @@ export default {
         this.modelData = response.data;
       } catch (error) {
         console.error('Failed to fetch model data', error);
+        this.showNotificationModal("error", "Unable to load models")
       }
     },
     openConfigModal(model) {
@@ -114,6 +115,25 @@ export default {
         }
       }, 100);
     },
+    async deployModel(model){
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          console.error('Access token not found. Please authenticate first.');
+          this.showNotificationModal("error", "Please Login again")
+          return;
+        }
+        const response = await axios.post(`${origin}/deploy/?model_id=${model.id}`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+        this.showNotificationModal("success", "Model Deployment Successful🚀")
+      } catch (error) {
+        console.error('Failed to fetch model data', error);
+        this.showNotificationModal("error", "Failed to deploy")
+      }
+    }
   },
   mounted() {
     this.modelData = [];
