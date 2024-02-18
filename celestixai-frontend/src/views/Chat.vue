@@ -45,6 +45,7 @@
   <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
     @close="hideNotification" />
   <spinner :loading="loading" />
+  <RAG v-if="buttonState"/>
 </template>
 
 <script>
@@ -59,7 +60,8 @@ export default {
   mixins: [NotificationMixin],
   components: {
     NotificationModal,
-    Spinner
+    Spinner, 
+    RAG
   },
   data() {
     return {

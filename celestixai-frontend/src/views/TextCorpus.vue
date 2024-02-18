@@ -88,6 +88,7 @@ export default {
         const accessToken = localStorage.getItem('accessToken');
         if (!accessToken) {
           console.error('Access token not found. Please authenticate first.');
+          this.showNotificationModal("error", "Please Login Again")
           return;
         }
         const response = await axios.get(`${origin}/dataset/`, {
@@ -98,6 +99,7 @@ export default {
 
         this.datasetData = response.data;
       } catch (error) {
+        this.showNotificationModal("error", "Could not load datasets")
         console.error('Failed to fetch model data', error);
       }
     },

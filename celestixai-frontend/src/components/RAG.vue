@@ -14,17 +14,20 @@
         </ul>
         <button @click="buildVectorStore" class="modal-button">Build Vector Store</button>
       </div>
+      <spinner :loading="loading" />
     </div>
   </template>
   
   
   <script>
 import axios from 'axios';
+import Spinner from "@/components/Spinner.vue"
 import { BACKEND_API_URL } from '../services/config';
 
 export default {
   data() {
     return {
+      loading: false,
       isModalVisible: true,
       datasetData: [],
       selectedDatasets: []
@@ -58,7 +61,6 @@ export default {
       }
     },
     async buildVectorStore() {
-      // Logic to handle selected datasets and close the modal
       console.log("Building Vector Store...");
       this.closeModal();
     },
