@@ -8,7 +8,7 @@ class Model(Base):
     __tablename__ = "model"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    uuid = Column(String, unique=True, nullable=True)
+    uuid = Column(String, unique=False, nullable=True)
     filename = Column(String, nullable=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship("User", back_populates="model")
