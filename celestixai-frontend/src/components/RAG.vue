@@ -1,37 +1,49 @@
 <template>
-    <div class="vector-store-modal" v-if="isModalVisible" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <button class="close-button" @click="closeModal">X</button>
-        <h2>Select Datasets</h2>
-        <div v-if="datasetData.length === 0">Loading datasets...</div>
-        <ul v-else class="dataset-list">
-          <li v-for="dataset in datasetData" :key="dataset.id">
-            <label>
-              <span class="filename">{{ truncateFilename(dataset.filename) }}</span>
-              <input class="checkboxes" type="checkbox" v-model="selectedDatasets" :value="dataset.id" @click.stop>
-            </label>
-          </li>
-        </ul>
-        <button @click="buildVectorStore" class="modal-button">Build Vector Store</button>
-      </div>
-      <spinner :loading="loading" />
+  <div class="vector-store-modal" v-if="isModalVisible" @click="closeModal">
+    <div class="modal-content" @click.stop>
+      <button class="close-button" @click="closeModal">X</button>
+      <h2>Select Datasets</h2>
+      <div v-if="datasetData.length === 0">Loading datasets...</div>
+      <ul v-else class="dataset-list">
+        <li v-for="dataset in datasetData" :key="dataset.id">
+          <label>
+            <span class="filename">{{ truncateFilename(dataset.filename) }}</span>
+            <input class="checkboxes" type="checkbox" v-model="selectedDatasets" :value="dataset.id" @click.stop>
+          </label>
+        </li>
+      </ul>
+      <button @click="buildVectorStore" class="modal-button">Build Vector Store</button>
     </div>
-  </template>
+    <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
+      @close="hideNotification" />
+    <spinner :loading="loading" />
+  </div>
+</template>
   
   
-  <script>
+<script>
 import axios from 'axios';
 import Spinner from "@/components/Spinner.vue"
-import { BACKEND_API_URL } from '../services/config';
+import NotificationModal from '@/components/NotificationModal.vue';
+import NotificationMixin from '@/mixins/notificationMixin.js';
+import { origin } from '../services/config';
 
 export default {
+  mixins: [NotificationMixin],
   data() {
     return {
       loading: false,
+      showNotification: false,
+      notificationMessage: '',
+      notificationType: 'info',
       isModalVisible: true,
       datasetData: [],
       selectedDatasets: []
     };
+  },
+  components: {
+    NotificationModal,
+    Spinner
   },
   async created() {
     await this.fetchDatasetData();
@@ -42,12 +54,11 @@ export default {
         const accessToken = localStorage.getItem('accessToken');
         if (!accessToken) {
           console.error('Access token not found. Please authenticate first.');
+          // this.showNotificationModel("error", "Please Login Again");
           return;
         }
-
-        const baseUrl = new URL(BACKEND_API_URL);
         const response = await axios.get(
-          `${baseUrl.origin}/dataset/`,
+          `${origin}/dataset/`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -58,11 +69,38 @@ export default {
         this.datasetData = response.data;
       } catch (error) {
         console.error('Failed to fetch dataset data', error);
+        // this.showNotificationModel("error", "Could not fetch datasets");
       }
     },
     async buildVectorStore() {
-      console.log("Building Vector Store...");
-      this.closeModal();
+      try {
+        console.log("Building Vector Store...");
+        console.log(this.selectedDatasets);
+
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+          console.error('Access token not found. Please authenticate first.');
+          // this.showNotificationModel("error", "Please Login Again");
+          return;
+        }
+
+        const response = await axios.post(
+          `${origin}/build-vector-store`,
+          { datasets: this.selectedDatasets },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        console.log('Vector store built successfully:', response.data);
+        this.closeModal();
+      } catch (error) {
+        // this.showNotificationModel("error", "Please Login Again");
+        console.error('Failed to build vector store', error);
+      }
     },
     closeModal() {
       this.isModalVisible = false;
@@ -79,26 +117,26 @@ export default {
 </script>
 
   
-  <style scoped>
-  .vector-store-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow-y: auto;
-  }
-  
-  .modal-content {
+<style scoped>
+.vector-store-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-y: auto;
+}
+
+.modal-content {
   background: linear-gradient(90deg, #f441a5, #03a9f4);
   border-radius: 8px;
   max-width: 80%;
   padding: 20px;
-  position: relative; 
+  position: relative;
 }
 
 .close-button {
@@ -125,6 +163,7 @@ export default {
 .modal-content li {
   margin-bottom: 10px;
 }
+
 .modal-content input[type="checkbox"] {
   appearance: none;
   position: relative;
@@ -138,6 +177,7 @@ export default {
   vertical-align: middle;
   margin-right: 10px;
 }
+
 .modal-content input[type="checkbox"]:checked::after {
   content: '\2714';
   font-size: 16px;
@@ -147,6 +187,7 @@ export default {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
 .modal-content label {
   display: flex;
   align-items: center;
@@ -178,7 +219,7 @@ export default {
 .modal-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #4CAF50; 
+  background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 4px;
@@ -189,6 +230,5 @@ export default {
 .modal-button:hover {
   background-color: #45a049;
 }
-
-  </style>
+</style>
   

@@ -45,9 +45,6 @@ export default {
   mixins: [NotificationMixin],
   data() {
     return {
-      showNotification: false,
-      notificationMessage: '',
-      notificationType: 'info',
       modelData: [],
       showConfigModal: false,
       selectedModel: null,
