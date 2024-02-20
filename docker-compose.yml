@@ -1,0 +1,30 @@
+version: '3'
+services:
+  backend:
+    build: ./celestixai-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+    environment:
+      DATABASE_URL: "postgresql://postgres:root@database:5432/celestixai-backend"
+    volumes:
+      - backenddata:/app
+
+  frontend:
+    build: ./celestixai-frontend
+    ports:
+      - "3000:3000"
+
+  database:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: celestixai-backend
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+  backenddata:

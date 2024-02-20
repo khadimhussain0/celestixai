@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.post("/build-vector-store")
-def build_document_vector_store(datasets: dict, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def build_document_vector_store(datasets: dict, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     dataset_ids = datasets.get('datasets', [])
     if not dataset_ids:
         raise HTTPException(status_code=400, detail="No dataset IDs provided")
