@@ -1,4 +1,7 @@
 import os
+import pysqlite3
+import sys
+sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 import time
 from langchain.chains import RetrievalQA
 from langchain.embeddings import HuggingFaceEmbeddings

@@ -1,17 +1,24 @@
+import time
+from sqlalchemy.exc import OperationalError
+from app.core.config import DATABASE_URL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from app.core.config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    retries = 10
+    delay = 3  # seconds
+    for _ in range(retries):
+        try:
+            db = SessionLocal()
+            yield db
+            return
+        except OperationalError:
+            print("Database connection not available. Retrying...")
+            time.sleep(delay)
+    raise OperationalError("Failed to connect to database after {} retries".format(retries))

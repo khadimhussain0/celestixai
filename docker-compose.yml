@@ -10,6 +10,7 @@ services:
       DATABASE_URL: "postgresql://postgres:root@database:5432/celestixai-backend"
     volumes:
       - backenddata:/app
+      - ./celestixai-backend:/app
 
   frontend:
     build: ./celestixai-frontend

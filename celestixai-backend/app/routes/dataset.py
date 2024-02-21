@@ -24,7 +24,7 @@ def create_dataset(
     current_user=Depends(get_current_user)
 ):
     dataset_uuid = str(uuid.uuid4())
-    dataset_path = os.path.join(FILE_STORAGE_PATH, dataset.filename + " ." + dataset_uuid)
+    dataset_path = os.path.join(FILE_STORAGE_PATH, dataset.filename + "." + dataset_uuid)
 
     with open(dataset_path, "wb") as f:
         f.write(dataset.file.read())

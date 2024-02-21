@@ -61,7 +61,7 @@ def chat(
 
         # Stub function to process model output
         def process_model_output():
-            response = ollama.chat(model="tinyllama:1.1b-chat-v1-q4_0",
+            response = ollama.chat(model="phi_v2:latest",
             messages= modified_messages)
             return (response['message']['content'])
 
@@ -110,13 +110,13 @@ def chat(
 
 
         model_input = {
-            "model": "tinyllama:1.1b-chat-v1-q4_0",
+            "model": "phi_v2:latest",
             "messages": modified_messages
         }
 
         # Stub function to process model output
         def process_model_output(model_input):
-            response = ollama.chat(model= "tinyllama:1.1b-chat-v1-q4_0",
+            response = ollama.chat(model= "phi_v2:latest",
             messages= modified_messages)
             return (response['message']['content'])
 
