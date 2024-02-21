@@ -85,7 +85,7 @@ export default {
         }
 
         const response = await axios.post(
-          `${origin}/build-vector-store`,
+          `${origin}/rag/build-vector-store`,
           { datasets: this.selectedDatasets },
           {
             headers: {

@@ -18,7 +18,7 @@
     <section class="hero">
       <div class="hero-content">
         <h1>Unlock the Power of AI for Your Business</h1>
-        <p>Revolutionize your data with LLM AI – Your Gateway to Intelligent Decision Making.</p>
+        <p>Revolutionize your data with LLM AI - Your Gateway to Intelligent Decision Making.</p>
         <router-link to="/auth" class="cta-button">Get Started</router-link>
       </div>
     </section>
@@ -76,25 +76,25 @@
     <section id="benefits" class="benefits">
       <h2>Benefits of LLM AI</h2>
       <div class="benefit-card">
-        <img src="../assets/easy-to-use.png" alt="Easy to Use">
+        <img src="../assets/upload-data.png" alt="Easy to Use">
         <h3>Easy to Use</h3>
         <p>Our platform provides a user-friendly experience, making AI accessible to all levels of expertise within your organization.</p>
       </div>
 
       <div class="benefit-card">
-        <img src="../assets/customizable.png" alt="Customizable">
+        <img src="../assets/upload-data.png" alt="Customizable">
         <h3>Customizable</h3>
         <p>Tailor AI models to your specific business needs, ensuring a personalized and effective solution for your industry.</p>
       </div>
 
       <div class="benefit-card">
-        <img src="../assets/fast-deployment.png" alt="Fast Deployment">
+        <img src="../assets/deploy.png" alt="Fast Deployment">
         <h3>Fast Deployment</h3>
         <p>Accelerate your AI implementation with our rapid deployment process, getting you up and running in no time.</p>
       </div>
 
       <div class="benefit-card">
-        <img src="../assets/powerful-results.png" alt="Powerful Results">
+        <img src="../assets/upload-data.png" alt="Powerful Results">
         <h3>Powerful Results</h3>
         <p>Experience transformative outcomes with our powerful AI models, driving innovation and success for your business.</p>
       </div>
@@ -118,7 +118,6 @@
       <div class="social-icons">
         <a href="#" target="_blank"><img src="../assets/twitter-icon.png" alt="Twitter"></a>
         <a href="#" target="_blank"><img src="../assets/linkedin-icon.png" alt="LinkedIn"></a>
-        <a href="#" target="_blank"><img src="../assets/facebook-icon.png" alt="Facebook"></a>
       </div>
     </footer>
   </div>

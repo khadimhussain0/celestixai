@@ -1,7 +1,7 @@
 <template>
   <div>
     <video autoplay muted loop id="backgroundVideo">
-      <source src="@/assets/Gen-2 889013846, a constellation of c, logo-upsampledpng, M 5.mp4" type="video/mp4">
+      <source src="@/assets/celestixai-background.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
     <div class="overlay"></div>
