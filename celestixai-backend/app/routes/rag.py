@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.post("/build-vector-store")
-def build_document_vector_store(datasets: dict, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+async def build_document_vector_store(datasets: dict, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     dataset_ids = datasets.get('datasets', [])
     if not dataset_ids:
         raise HTTPException(status_code=400, detail="No dataset IDs provided")
@@ -35,14 +35,16 @@ def build_document_vector_store(datasets: dict, current_user=Depends(get_current
 
     for dataset in user_datasets:
         dataset_path = os.path.join(FILE_STORAGE_PATH, dataset.filename + "." + dataset.uuid)
-        destination_path = os.path.join(source_documents_dir, dataset.filename + "." + dataset.uuid)
+        destination_path = os.path.join(source_documents_dir, dataset.filename)
+        print(dataset_path)
+        print(destination_path)
         if not os.path.exists(destination_path):
             try:
                 shutil.copy(dataset_path, destination_path)
             except FileNotFoundError:
                 raise HTTPException(status_code=500, detail="Failed to copy dataset file")
-
+    db.close()
     processor = DocumentProcessor(source_directory=source_documents_dir, persist_directory=persist_dir)
-    processor.process_documents()
+    await processor.process_documents()
 
     return {"success": True}
