@@ -30,20 +30,15 @@ class DocumentProcessor:
     def __init__(
         self,
         files,
+        ollama_embedder,
         chunk_size: int = 500,
         chunk_overlap: int = 50,
-        embeddings_model_name: str = 'all-MiniLM-L6-v2',
-        ollama_embedder = None
     ):
         self.files = files
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        self.embeddings_model_name = embeddings_model_name
         self.ollama_embedder = ollama_embedder
-        if self.ollama_embedder is None:
-            self.embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
-        else:
-            self.embeddings = self.ollama_embedder
+        self.embeddings = self.ollama_embedder
 
         # Define loader mappings
         self.LOADER_MAPPING = {
@@ -94,7 +89,7 @@ class DocumentProcessor:
 
     def process_documents(self, collection_name: str = "vectorstore", ignored_files: List[str] = []) -> None:
         url = "http://celestixai-qdrant-1:6333"
-        texts = self._process_documents()
+        texts = self._process_documents(ignored_files)
         print(f"Creating embeddings. May take some minutes...")
         qdrant = Qdrant.from_documents(
             texts,
