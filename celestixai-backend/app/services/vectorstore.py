@@ -92,26 +92,30 @@ class DocumentProcessor:
         print(f"Split into {len(texts)} chunks of text (max. {self.chunk_size} tokens each)")
         return texts
 
-    def process_documents(self, collection_name: str, ignored_files: List[str] = []) -> None:
-        url = "<---qdrant url here --->"
+    def process_documents(self, collection_name: str = "vectorstore", ignored_files: List[str] = []) -> None:
+        url = "http://celestixai-qdrant-1:6333"
         texts = self._process_documents()
         print(f"Creating embeddings. May take some minutes...")
-        qdrant = Qdrant.from_texts(
+        qdrant = Qdrant.from_documents(
             texts,
             self.ollama_embedder,
-            location=":memory:",
-            # url=url,
-            # prefer_grpc=True,
-            collection_name="my_documents",
+            # location=":memory:",
+            url=url,
+            prefer_grpc=True,
+            collection_name=collection_name,
         )
-        # db = Qdrant.from_documents(documents, embeddings, "http://localhost:6333")
-        # db = Chroma.from_documents(texts, self.embeddings, persist_directory=self.persist_directory)
+
+        query="name of the story"
+        found_docs = qdrant.similarity_search_with_score(query)
+        document, score = found_docs[0]
+        print(document.page_content)
+        print(f"\nScore: {score}")
         print("Document Embedding complete!")
 
 
 if __name__ == "__main__":
-    ollama_embedder= OllamaEmbeddings(base_url='http://celestixai-ollama-1:11434')
-    print(os.listdir("/app/vectorestore/1/source_documents"))
-    files= ["/app/vectorestore/1/source_documents/file.txt"]
+    ollama_embedder= OllamaEmbeddings(base_url='http://celestixai-ollama-1:11434', model='nomic-embed-text')
+    files= ["/app/vectorestore/galaxticmart.txt"]
     processor = DocumentProcessor(files=files, ollama_embedder=ollama_embedder)
     processor.process_documents("docs")
+    print("embedding done")
