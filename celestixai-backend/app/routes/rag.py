@@ -7,15 +7,14 @@ from app.models.dataset import Dataset
 from app.core.config import FILE_STORAGE_PATH
 from app.services.vectorstore import DocumentProcessor
 from langchain_community.embeddings import OllamaEmbeddings
+import asyncio
 
 router = APIRouter(
     prefix="/rag",
     tags=["Retrieval Augmented Generation"]
 )
 
-
-@router.post("/build-vector-store")
-async def build_document_vector_store(datasets: dict, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+async def async_document_processing(current_user, db, datasets):
     dataset_ids = datasets.get('datasets', [])
     if not dataset_ids:
         raise HTTPException(status_code=400, detail="No dataset IDs provided")
@@ -31,9 +30,14 @@ async def build_document_vector_store(datasets: dict, current_user=Depends(get_c
             dataset_path = os.path.join(FILE_STORAGE_PATH, dataset.uuid +"____" + dataset.filename)
             rag_files.append(dataset_path)
         processor = DocumentProcessor(files=rag_files, ollama_embedder=ollama_embedder)
-        processor.process_documents(str(current_user.id))
+        await processor.process_documents(str(current_user.id))
     except Exception as e:
-        print("Exception occured in RAG processing see logs for details...", e)
+        print("Exception occurred in RAG processing see logs for details...", e)
         return {"success": False}
     
+    return {"success": True}
+
+@router.post("/build-vector-store")
+async def build_document_vector_store(datasets: dict, current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    asyncio.create_task(async_document_processing(current_user, db, datasets))
     return {"success": True}

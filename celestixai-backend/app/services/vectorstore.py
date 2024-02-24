@@ -21,7 +21,6 @@ from langchain_community.document_loaders import (
     UnstructuredWordDocumentLoader,
 )
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Qdrant
 from langchain.docstore.document import Document
 
@@ -87,11 +86,11 @@ class DocumentProcessor:
         print(f"Split into {len(texts)} chunks of text (max. {self.chunk_size} tokens each)")
         return texts
 
-    def process_documents(self, collection_name: str = "vectorstore", ignored_files: List[str] = []) -> None:
+    async def process_documents(self, collection_name: str = "vectorstore", ignored_files: List[str] = []) -> None:
         url = "http://celestixai-qdrant-1:6333"
         texts = self._process_documents(ignored_files)
         print(f"Creating embeddings. May take some minutes...")
-        qdrant = Qdrant.from_documents(
+        qdrant = await Qdrant.afrom_documents(
             texts,
             self.ollama_embedder,
             # location=":memory:",
@@ -100,8 +99,8 @@ class DocumentProcessor:
             collection_name=collection_name,
         )
 
-        query="name of the story"
-        found_docs = qdrant.similarity_search_with_score(query)
+        query="hello"
+        found_docs = await qdrant.similarity_search_with_score(query)
         document, score = found_docs[0]
         print(document.page_content)
         print(f"\nScore: {score}")
