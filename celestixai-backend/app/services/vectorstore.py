@@ -6,6 +6,7 @@ import glob
 from typing import List
 from multiprocessing import Pool
 from tqdm import tqdm
+from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.document_loaders import (
     CSVLoader,
     EverNoteLoader,
@@ -20,31 +21,29 @@ from langchain_community.document_loaders import (
     UnstructuredWordDocumentLoader,
 )
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Qdrant
 from langchain.docstore.document import Document
-from chromadb.config import Settings
 
 
 class DocumentProcessor:
     def __init__(
         self,
-        source_directory: str,
-        persist_directory: str = 'db',
+        files,
         chunk_size: int = 500,
         chunk_overlap: int = 50,
         embeddings_model_name: str = 'all-MiniLM-L6-v2',
+        ollama_embedder = None
     ):
-        self.source_directory = source_directory
-        self.persist_directory = persist_directory
+        self.files = files
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.embeddings_model_name = embeddings_model_name
-        self.CHROMA_SETTINGS = Settings(
-            persist_directory=persist_directory,
-            anonymized_telemetry=False
-        )
-        self.embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
+        self.ollama_embedder = ollama_embedder
+        if self.ollama_embedder is None:
+            self.embeddings = HuggingFaceEmbeddings(model_name=embeddings_model_name)
+        else:
+            self.embeddings = self.ollama_embedder
 
         # Define loader mappings
         self.LOADER_MAPPING = {
@@ -71,10 +70,10 @@ class DocumentProcessor:
             return loader.load()
         raise ValueError(f"Unsupported file extension '{ext}'")
 
-    def _load_documents(self, ignored_files: List[str] = []) -> List[Document]:
+    def _load_documents(self, files: List[str], ignored_files: List[str] = []) -> List[Document]:
         all_files = []
         for ext in self.LOADER_MAPPING:
-            all_files.extend(glob.glob(os.path.join(self.source_directory, f"**/*{ext}"), recursive=True))
+            all_files.extend([file for file in files if file.endswith(ext)])
         filtered_files = [file_path for file_path in all_files if file_path not in ignored_files]
         with Pool(processes=os.cpu_count()) as pool:
             results = []
@@ -85,46 +84,34 @@ class DocumentProcessor:
         return results
 
     def _process_documents(self, ignored_files: List[str] = []) -> List[Document]:
-        print(f"Loading documents from {self.source_directory}")
-        documents = self._load_documents(ignored_files)
+        documents = self._load_documents(self.files, ignored_files)
         if not documents:
             print("No new documents to load")
-            exit(0)
-        print(f"Loaded {len(documents)} new documents from {self.source_directory}")
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap)
         texts = text_splitter.split_documents(documents)
         print(f"Split into {len(texts)} chunks of text (max. {self.chunk_size} tokens each)")
         return texts
 
-    def _does_vectorstore_exist(self) -> bool:
-        if os.path.exists(os.path.join(self.persist_directory, 'index')):
-            if os.path.exists(os.path.join(self.persist_directory, 'chroma-collections.parquet')) and os.path.exists(os.path.join(self.persist_directory, 'chroma-embeddings.parquet')):
-                list_index_files = glob.glob(os.path.join(self.persist_directory, 'index/*.bin'))
-                list_index_files += glob.glob(os.path.join(self.persist_directory, 'index/*.pkl'))
-                if len(list_index_files) > 3:
-                    return True
-        return False
-
-    def process_documents(self, ignored_files: List[str] = []) -> None:
-        if self._does_vectorstore_exist():
-            print(f"Appending to existing vectorstore at {self.persist_directory}")
-            db = Chroma(persist_directory=self.persist_directory, embedding_function=self.embeddings, client_settings=self.CHROMA_SETTINGS)
-            collection = db.get()
-            texts = self._process_documents([metadata['source'] for metadata in collection['metadatas']])
-            print(f"Creating embeddings. May take some minutes...")
-            db.add_documents(texts)
-        else:
-            print("Creating new vectorstore")
-            texts = self._process_documents()
-            print(f"Creating embeddings. May take some minutes...")
-            db = Chroma.from_documents(texts, self.embeddings, persist_directory=self.persist_directory)
-        db.persist()
-        db = None
-        print("Ingestion complete!")
+    def process_documents(self, collection_name: str, ignored_files: List[str] = []) -> None:
+        url = "<---qdrant url here --->"
+        texts = self._process_documents()
+        print(f"Creating embeddings. May take some minutes...")
+        qdrant = Qdrant.from_texts(
+            texts,
+            self.ollama_embedder,
+            location=":memory:",
+            # url=url,
+            # prefer_grpc=True,
+            collection_name="my_documents",
+        )
+        # db = Qdrant.from_documents(documents, embeddings, "http://localhost:6333")
+        # db = Chroma.from_documents(texts, self.embeddings, persist_directory=self.persist_directory)
+        print("Document Embedding complete!")
 
 
 if __name__ == "__main__":
-    source_dir = os.environ.get('SOURCE_DIRECTORY', 'source_documents')
-    persist_dir = os.environ.get('PERSIST_DIRECTORY', 'db')
-    processor = DocumentProcessor(source_directory=source_dir, persist_directory=persist_dir)
-    processor.process_documents()
+    ollama_embedder= OllamaEmbeddings(base_url='http://celestixai-ollama-1:11434')
+    print(os.listdir("/app/vectorestore/1/source_documents"))
+    files= ["/app/vectorestore/1/source_documents/file.txt"]
+    processor = DocumentProcessor(files=files, ollama_embedder=ollama_embedder)
+    processor.process_documents("docs")

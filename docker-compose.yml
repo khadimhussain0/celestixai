@@ -26,6 +26,14 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+
 volumes:
   pgdata:
   backenddata:
+  ollama:
