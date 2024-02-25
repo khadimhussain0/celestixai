@@ -7,7 +7,11 @@ from app.models.chat import Chat
 from app.models.models import Model
 from app.models.model_constellation import ModelConstellation
 from app.schemas.chat import ChatRequest, ChatResponse, AssistantChatMessage
+from app.core.config import OLLAMA_SERVER_URL, QDRANT_SERVER_URL
 from app.utils.preprocess_chat_messages import base64_to_bytes
+from app.services.retreiver import RAGChat
+from langchain_community.llms import Ollama
+from langchain_community.embeddings import OllamaEmbeddings
 import time
 import json
 from typing import List
@@ -17,7 +21,6 @@ router = APIRouter(
     prefix="/chat",
     tags=["Chat"]
 )
-
 
 @router.post("/", response_model=AssistantChatMessage)
 def chat(
@@ -38,6 +41,7 @@ def chat(
     ).first()
 
     chat_id = form_data.chat_id
+    rag = form_data.rag
     start = time.time()
     
     if not chat_id:
@@ -56,7 +60,14 @@ def chat(
         messages = chat_messages["messages"]
         modified_messages = preprocess_messages(messages, models_metadata)
 
-        model_response = client.chat(model="tinyllama", messages=modified_messages)
+        if rag:
+            rag_chat_instance = RAGChat(OllamaEmbeddings(base_url=OLLAMA_SERVER_URL, model="nomic-embed-text"),
+                                        Ollama(base_url=OLLAMA_SERVER_URL, model="tinyllama"))
+            model_response, docs = rag_chat_instance.ask_question(query=form_data.messages[0].content, 
+                                                            qdrant_url=QDRANT_SERVER_URL,
+                                                            collection_name=str(current_user.id))
+        else:
+            model_response = client.chat(model="tinyllama", messages=modified_messages)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
@@ -87,7 +98,14 @@ def chat(
         messages = chat_messages["messages"]
         modified_messages = preprocess_messages(messages, models_metadata)
 
-        model_response = client.chat(model="tinyllama", messages=modified_messages)
+        if rag:
+            rag_chat_instance = RAGChat(OllamaEmbeddings(base_url=OLLAMA_SERVER_URL, model="nomic-embed-text"),
+                                        Ollama(base_url=OLLAMA_SERVER_URL, model="tinyllama"))
+            model_response, docs = rag_chat_instance.ask_question(query=form_data.messages[0].content, 
+                                                            qdrant_url=QDRANT_SERVER_URL,
+                                                            collection_name=str(current_user.id))
+        else:
+            model_response = client.chat(model="tinyllama", messages=modified_messages)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
