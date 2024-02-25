@@ -11,6 +11,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
+    rag: bool = False
     model: str
     model_id: int
     timestamp: int

@@ -111,5 +111,5 @@ if __name__ == "__main__":
     ollama_embedder= OllamaEmbeddings(base_url='http://celestixai-ollama-1:11434', model='nomic-embed-text')
     files= ["/app/vectorestore/galaxticmart.txt"]
     processor = DocumentProcessor(files=files, ollama_embedder=ollama_embedder)
-    processor.process_documents("docs")
+    processor.process_documents()
     print("embedding done")
