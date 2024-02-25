@@ -1,8 +1,5 @@
 import os
-import pysqlite3
-import sys
-sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
-import glob
+from app.core.config import QDRANT_SERVER_URL
 from typing import List
 from multiprocessing import Pool
 from tqdm import tqdm
@@ -87,23 +84,22 @@ class DocumentProcessor:
         return texts
 
     async def process_documents(self, collection_name: str = "vectorstore", ignored_files: List[str] = []) -> None:
-        url = "http://celestixai-qdrant-1:6333"
+        url = QDRANT_SERVER_URL
         texts = self._process_documents(ignored_files)
         print(f"Creating embeddings. May take some minutes...")
         qdrant = await Qdrant.afrom_documents(
             texts,
             self.ollama_embedder,
-            # location=":memory:",
             url=url,
             prefer_grpc=True,
             collection_name=collection_name,
         )
 
-        query="hello"
-        found_docs = await qdrant.similarity_search_with_score(query)
-        document, score = found_docs[0]
-        print(document.page_content)
-        print(f"\nScore: {score}")
+        # query="hello"
+        # found_docs = await qdrant.similarity_search_with_score(query)
+        # document, score = found_docs[0]
+        # print(document.page_content)
+        # print(f"\nScore: {score}")
         print("Document Embedding complete!")
 
 

@@ -5,6 +5,7 @@ from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.dataset import Dataset
 from app.core.config import FILE_STORAGE_PATH
+from app.core.config import OLLAMA_SERVER_URL, QDRANT_SERVER_URL
 from app.services.vectorstore import DocumentProcessor
 from langchain_community.embeddings import OllamaEmbeddings
 import asyncio
@@ -24,7 +25,7 @@ async def async_document_processing(current_user, db, datasets):
         raise HTTPException(status_code=404, detail="No datasets found for the current user with the provided IDs")
     
     try:
-        ollama_embedder= OllamaEmbeddings(base_url='http://celestixai-ollama-1:11434', model="nomic-embed-text")
+        ollama_embedder= OllamaEmbeddings(base_url=OLLAMA_SERVER_URL, model="nomic-embed-text")
         rag_files = []
         for dataset in user_datasets:
             dataset_path = os.path.join(FILE_STORAGE_PATH, dataset.uuid +"____" + dataset.filename)

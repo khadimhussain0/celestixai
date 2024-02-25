@@ -24,5 +24,5 @@ COPY celestixai.conf /etc/supervisor/conf.d/celestixai.conf
 
 EXPOSE 8000
 
-# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/celestixai.conf"]
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

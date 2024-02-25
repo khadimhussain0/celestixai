@@ -11,11 +11,15 @@ services:
     volumes:
       - backenddata:/app
       - ./celestixai-backend:/app
+    networks:
+      - backend_network
 
   frontend:
     build: ./celestixai-frontend
     ports:
       - "3000:3000"
+    networks:
+      - backend_network
 
   database:
     image: postgres
@@ -25,6 +29,8 @@ services:
       POSTGRES_DB: celestixai-backend
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend_network
 
   ollama:
     image: ollama/ollama
@@ -32,11 +38,12 @@ services:
       - "11434:11434"
     volumes:
       - ollama:/root/.ollama
+    networks:
+      - backend_network
   
   qdrant:
     image: qdrant/qdrant:latest
     restart: always
-    container_name: qdrant
     ports:
       - 6333:6333
       - 6334:6334
@@ -44,14 +51,19 @@ services:
       - 6333
       - 6334
       - 6335
-    configs:
-      - source: qdrant_config
-        target: /qdrant/config/production.yaml
+    # configs:
+    #   - source: qdrant_config
+    #     target: /qdrant/config/production.yaml
     volumes:
       - ./qdrant_data:/qdrant_data
+    networks:
+      - backend_network
+
+networks:
+  backend_network:
 
 volumes:
   pgdata:
   backenddata:
   ollama:
-  ./qdrant_data: 
+  qdrant_data:
