@@ -40,7 +40,14 @@ services:
       - ollama:/root/.ollama
     networks:
       - backend_network
-  
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
   qdrant:
     image: qdrant/qdrant:latest
     restart: always
