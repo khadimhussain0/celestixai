@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.core.config import OLLAMA_SERVER_URL
 from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.chat import Chat
@@ -10,7 +11,7 @@ from app.utils.preprocess_chat_messages import base64_to_bytes
 import time
 import json
 from typing import List
-import ollama
+from ollama import Client
 
 router = APIRouter(
     prefix="/chat",
@@ -24,15 +25,21 @@ def chat(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    models_metadata = db.query(Model.id,
-                 ModelConstellation.is_vision,
-                 ModelConstellation.ollama_name).join(
-                     ModelConstellation, ModelConstellation.id == Model.model_constellation_id
-                     ).filter(Model.id == form_data.model_id).first()
+    client = Client(host=OLLAMA_SERVER_URL)
+
+    models_metadata = db.query(
+        Model.id,
+        ModelConstellation.is_vision,
+        ModelConstellation.ollama_name
+    ).join(
+        ModelConstellation, ModelConstellation.id == Model.model_constellation_id
+    ).filter(
+        Model.id == form_data.model_id
+    ).first()
 
     chat_id = form_data.chat_id
     start = time.time()
-    # If chat_id is 0 or not provided, create a new chat
+    
     if not chat_id:
         chat = Chat(
             user_id=current_user.id,
@@ -44,36 +51,19 @@ def chat(
         db.add(chat)
         db.commit()
         db.refresh(chat)
-        # Read the newly created chat content
+
         chat_messages = json.loads(chat.chat)
         messages = chat_messages["messages"]
-        modified_messages = []
-        for message in messages:
-            modified_message = message.copy()
-            modified_message.pop('message_id')
-            try:
-                modified_message["images"]=[base64_to_bytes(modified_message["images"][0])]
-            except Exception as e:
-                print(f"Exception occured: {e}")
-            if not models_metadata.is_vision:
-                modified_message.pop("images")
-            modified_messages.append(modified_message)
+        modified_messages = preprocess_messages(messages, models_metadata)
 
-        # Stub function to process model output
-        def process_model_output():
-            response = ollama.chat(model="phi_v2:latest",
-            messages= modified_messages)
-            return (response['message']['content'])
-
-        model_response = process_model_output()
+        model_response = client.chat(model="tinyllama", messages=modified_messages)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
             role="assistant",
-            content=model_response,
+            content=model_response['message']['content'],
             message_id=int(time.time() * 1000)
         )
-
 
         chat_messages["messages"].append(assistant_message.dict())
         chat.chat = json.dumps(chat_messages)
@@ -83,7 +73,6 @@ def chat(
         return assistant_message
 
     else:
-        # If chat_id is provided, process the existing chat
         chat = db.query(Chat).filter(Chat.id == chat_id).first()
         if not chat:
             raise HTTPException(status_code=404, detail="Chat not found")
@@ -96,36 +85,14 @@ def chat(
         db.refresh(chat)
 
         messages = chat_messages["messages"]
-        modified_messages = []
-        for message in messages:
-            modified_message = message.copy()
-            modified_message.pop('message_id')
-            try:
-                modified_message["images"]=[base64_to_bytes(modified_message["images"][0])]
-            except Exception as e:
-                print(f"Exception occured: {e}")
-            if not models_metadata.is_vision:
-                modified_message.pop("images")
-            modified_messages.append(modified_message)
+        modified_messages = preprocess_messages(messages, models_metadata)
 
-
-        model_input = {
-            "model": "phi_v2:latest",
-            "messages": modified_messages
-        }
-
-        # Stub function to process model output
-        def process_model_output(model_input):
-            response = ollama.chat(model= "phi_v2:latest",
-            messages= modified_messages)
-            return (response['message']['content'])
-
-        model_response = process_model_output(model_input)
+        model_response = client.chat(model="tinyllama", messages=modified_messages)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
             role="assistant",
-            content=model_response,
+            content=model_response['message']['content'],
             message_id=int(time.time() * 1000)
         )
 
@@ -137,6 +104,19 @@ def chat(
         print("Took (s): ", time.time()-start)
         return assistant_message
 
+def preprocess_messages(messages, models_metadata):
+    modified_messages = []
+    for message in messages:
+        modified_message = message.copy()
+        modified_message.pop('message_id')
+        try:
+            modified_message["images"] = [base64_to_bytes(modified_message["images"][0])]
+        except Exception as e:
+            print(f"Exception occurred: {e}")
+        if not models_metadata.is_vision:
+            modified_message.pop("images")
+        modified_messages.append(modified_message)
+    return modified_messages
 
 @router.get("/", response_model=List[ChatResponse])
 def get_chats(
