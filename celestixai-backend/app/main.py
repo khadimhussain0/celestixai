@@ -8,11 +8,16 @@ from app.routes import chat
 from app.routes import deployments
 from app.routes import rag
 from app.core.database import engine, Base
+from app.services.pull_models import pull_model
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    print("Pulling Embedding Model...")
+    pull_model("nomic-embed-text")
+    print("Pulling Initial Model...")
+    pull_model("tinyllama")
     yield
 
 app = FastAPI(
