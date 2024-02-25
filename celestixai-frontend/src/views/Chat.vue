@@ -68,6 +68,7 @@ export default {
       buttonState: false,
       recentChats: null,
       currentChat: {
+        rag: false,
         model: "null",
         model_id: 0,
         timestamp: Date.now(),
@@ -208,6 +209,7 @@ export default {
     },
     createNewChat() {
       this.currentChat = {
+        rag: false,
         model: "null",
         model_id: 0,
         timestamp: Date.now(),
