@@ -59,11 +59,11 @@ export default {
     renderTotalTokensChart() {
       // Example data
       const data = {
-        labels: ['User 1', 'User 2', 'User 3'],
+        labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
         datasets: [{
-          label: 'Total Tokens Used by User',
-          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
-          data: [5000, 7000, 9000],
+          label: 'Total Tokens Used by Days',
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#FF6784', '#12A2EB', '#FFCE11', 'FFCE90'],
+          data: [5000, 7000, 9000, 300, 4000, 11000, 1200],
         }],
       };
 
