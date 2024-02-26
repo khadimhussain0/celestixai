@@ -1,9 +1,11 @@
 import time
-from langchain.chains import RetrievalQA
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Qdrant
 import qdrant_client
 from langchain_community.llms import Ollama
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
 
 
 class RAGChat:
@@ -22,17 +24,28 @@ class RAGChat:
                     embeddings=self.embeddings,
                 )
         retriever = doc_store.as_retriever(search_kwargs={"k": self.target_source_chunks})
-        llm = self.ollama
-        qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents=not self.hide_source)
 
+        template = """Answer the following question using the provided context.
+                If you can't find the answer, do not pretend you know it, but answer "I don't know":
+        {context}
+
+        Question: {question}
+        """
+        prompt = ChatPromptTemplate.from_template(template)
+        print(prompt)
+        chain = (
+            {"context": retriever, "question": RunnablePassthrough()}
+            | prompt
+            |self.ollama
+            | StrOutputParser()
+            )
+        
         start = time.time()
-        res = qa(query)
         end = time.time()
 
-        answer, docs = res['result'], [] if self.hide_source else res['source_documents']
+        answer, docs = chain.invoke(query), []
+        print(answer)
         print(f"Took to retrieve: {end-start}s")
-        # print("this is answer", answer)
-        # print("this is doc", docs)
         return answer, docs
 
 

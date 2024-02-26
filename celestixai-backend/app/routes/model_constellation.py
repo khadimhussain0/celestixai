@@ -25,8 +25,8 @@ def create_model(
 ):
     model_uuid = str(uuid.uuid4())
     icon_uuid = str(uuid.uuid4())
-    model_path = os.path.join(FILE_STORAGE_PATH, model_file.filename + "." + model_uuid)
-    icon_path = os.path.join(FILE_STORAGE_PATH, icon_file.filename + "." + icon_uuid)
+    model_path = os.path.join(FILE_STORAGE_PATH, model_uuid + "____" + model_file.filename )
+    icon_path = os.path.join(FILE_STORAGE_PATH, icon_uuid + "____" + icon_file.filename)
 
     with open(model_path, "wb") as f:
         f.write(model_file.file.read())

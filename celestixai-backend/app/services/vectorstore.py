@@ -27,8 +27,8 @@ class DocumentProcessor:
         self,
         files,
         ollama_embedder,
-        chunk_size: int = 500,
-        chunk_overlap: int = 50,
+        chunk_size: int = 1024,
+        chunk_overlap: int = 200,
     ):
         self.files = files
         self.chunk_size = chunk_size
