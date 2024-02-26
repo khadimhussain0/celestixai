@@ -33,7 +33,7 @@
         <input id="imageUpload" v-if="isVisionModel" type="file" @change="onImageChange" accept="image/*" />
 
         <label class="switch">
-          <input type="checkbox" v-model="buttonState">
+          <input type="checkbox" v-model="buttonState" @click="toggleButton()">
           <span class="slider round"></span>
           <span class="rag-span">RAG</span>
         </label>
@@ -100,18 +100,20 @@ export default {
   methods: {
     toggleButton() {
       this.buttonState = !this.buttonState;
+      this.currentChat.rag=this.buttonState;
+      console.log(this.buttonState)
     },
     changeModel() {
       if (this.selectedModel) {
-        console.log("Selected Model Data:", this.selectedModel);
+        // console.log("Selected Model Data:", this.selectedModel);
       }
     },
     changeChat() {
-      console.log("clicked on a chat")
-      console.log(this.currentChat)
+      // console.log("clicked on a chat")
+      // console.log(this.currentChat)
     },
     async fetchChats() {
-      console.log("fetchchats")
+      console.log("fetching chats...")
       try {
         const accessToken = localStorage.getItem('accessToken');
         if (!accessToken) {
@@ -209,7 +211,7 @@ export default {
     },
     createNewChat() {
       this.currentChat = {
-        rag: false,
+        rag: this.buttonState,
         model: "null",
         model_id: 0,
         timestamp: Date.now(),
@@ -238,7 +240,7 @@ export default {
     }
     this.fetchChats().then(recentChats => {
       if (this.currentChat != null && recentChats.length > 0) {
-        console.log(this.currentChat)
+        // console.log(this.currentChat)
         this.recentChats = [this.currentChat, ...this.recentChats]
         this.currentChat = recentChats[0];
       }
