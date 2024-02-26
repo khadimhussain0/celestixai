@@ -27,7 +27,7 @@
     </div>
     <!-- Include the ChangeConfigModel component -->
     <change-config-model v-if="showConfigModal" :model="selectedModel" @config-changed="handleConfigChanged"
-     @close="closeConfigModal"/>
+      @close="closeConfigModal" />
     <!-- Use NotificationModal component -->
     <notification-modal :show="showNotification" :message="notificationMessage" :notification-type="notificationType"
       @close="hideNotification" />
@@ -95,7 +95,7 @@ export default {
     },
     startFineTuning(model) {
       // Start fine tuning process for the selected model
-      if (this.isFineTuning){
+      if (this.isFineTuning) {
         this.showNotificationModal("info", "Can't Start a new fine tuning job\n One Job is already in progress");
         return
       }
@@ -112,7 +112,7 @@ export default {
         }
       }, 100);
     },
-    async deployModel(model){
+    async deployModel(model) {
       try {
         const accessToken = localStorage.getItem('accessToken');
         if (!accessToken) {
@@ -120,14 +120,14 @@ export default {
           this.showNotificationModal("error", "Please Login again")
           return;
         }
-        const response = await axios.post(`${origin}/deploy/?model_id=${model.id}`, {
+        const response = await axios.post(`${origin}/deploy/?model_id=${model.id}`, null, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
         });
         this.showNotificationModal("success", "Model Deployment Successful🚀")
       } catch (error) {
-        console.error('Failed to fetch model data', error);
+        console.error('Failed to deploy model', error);
         this.showNotificationModal("error", "Failed to deploy")
       }
     }
@@ -152,7 +152,7 @@ export default {
 }
 
 .model-card:hover {
-  background: linear-gradient(360deg, #90b9f6 , #92f879);
+  background: linear-gradient(360deg, #90b9f6, #92f879);
 }
 
 .model-icon {
@@ -214,20 +214,21 @@ export default {
   border-radius: 30px;
   z-index: 1;
 }
- 
+
 .button-container input:hover {
   animation: animate 8s linear infinite;
 }
- 
+
 @keyframes animate {
   0% {
     background-position: 0%;
   }
+
   100% {
     background-position: 400%;
   }
 }
- 
+
 .finetune-btn input:before {
   content: "";
   position: absolute;
@@ -242,7 +243,7 @@ export default {
   opacity: 0;
   transition: .5s;
 }
- 
+
 .finetune-btn input:hover:before {
   filter: blur(20px);
   opacity: 1;
