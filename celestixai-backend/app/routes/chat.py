@@ -62,12 +62,13 @@ def chat(
 
         if rag:
             rag_chat_instance = RAGChat(OllamaEmbeddings(base_url=OLLAMA_SERVER_URL, model="nomic-embed-text"),
-                                        Ollama(base_url=OLLAMA_SERVER_URL, model="tinyllama"))
+                                        Ollama(base_url=OLLAMA_SERVER_URL, model="mistral:7b-instruct-v0.2-q6_K"))
             model_response, docs = rag_chat_instance.ask_question(query=form_data.messages[0].content, 
                                                             qdrant_url=QDRANT_SERVER_URL,
                                                             collection_name=str(current_user.id))
+            model_response = {"message":{"content": model_response}}
         else:
-            model_response = client.chat(model="tinyllama", messages=modified_messages)
+            model_response = client.chat(model="mistral:7b-instruct-v0.2-q6_K", messages=modified_messages)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
@@ -100,12 +101,13 @@ def chat(
 
         if rag:
             rag_chat_instance = RAGChat(OllamaEmbeddings(base_url=OLLAMA_SERVER_URL, model="nomic-embed-text"),
-                                        Ollama(base_url=OLLAMA_SERVER_URL, model="tinyllama"))
+                                        Ollama(base_url=OLLAMA_SERVER_URL, model="mistral:7b-instruct-v0.2-q6_K"))
             model_response, docs = rag_chat_instance.ask_question(query=form_data.messages[0].content, 
                                                             qdrant_url=QDRANT_SERVER_URL,
                                                             collection_name=str(current_user.id))
+            model_response = {"message":{"content": model_response}}
         else:
-            model_response = client.chat(model="tinyllama", messages=modified_messages)
+            model_response = client.chat(model="mistral:7b-instruct-v0.2-q6_K", messages=modified_messages)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
