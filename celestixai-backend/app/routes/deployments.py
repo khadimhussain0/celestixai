@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.models import Model
-from app.core.config import LLM_ENGINE_URL, FILE_STORAGE_PATH
+from app.core.config import OLLAMA_SERVER_URL, FILE_STORAGE_PATH
 import httpx  # for making HTTP requests
 from uuid import uuid4
 
@@ -15,8 +15,8 @@ router = APIRouter(
 
 async def send_deployment_request(payload):
     async with httpx.AsyncClient(follow_redirects=True) as client:
-        print(LLM_ENGINE_URL + "/create")
-        response = await client.post(LLM_ENGINE_URL + "/create", json=payload, timeout=60.0)
+        print(OLLAMA_SERVER_URL + "/create")
+        response = await client.post(OLLAMA_SERVER_URL + "/api/create", json=payload, timeout=60.0)
         return response
 
 
@@ -30,7 +30,7 @@ async def create_model(
     if not model:
         raise HTTPException(status_code=404, detail="Model not found")
 
-    model_path = f"{FILE_STORAGE_PATH}/{model.filename}.{model.uuid}"
+    model_path = f"{FILE_STORAGE_PATH}/{model.uuid}____{model.filename}"
     print(model_path)
 
     payload = {
