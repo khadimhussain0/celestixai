@@ -94,6 +94,8 @@ export default {
       this.fetchModelData();
     },
     startFineTuning(model) {
+      this.showNotificationModal("info", "Fine Tuning Support Coming Soon!");
+        return
       // Start fine tuning process for the selected model
       if (this.isFineTuning) {
         this.showNotificationModal("info", "Can't Start a new fine tuning job\n One Job is already in progress");

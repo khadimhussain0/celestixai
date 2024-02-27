@@ -24,7 +24,7 @@
       <div v-if="activeTab === 4">
         <Chat />
       </div>
-      <div v-if="activeTab === 5">Deployments</div>
+      <div v-if="activeTab === 5"><Deployments/></div>
     </div>
   </div>
 </template>
@@ -35,6 +35,7 @@ import LLMConstellation from '@/views/LLMConstellation.vue';
 import LLMs from '@/views/LLMs.vue';
 import Chat from '@/views/Chat.vue';
 import Dashboard from '@/views/Dashboard.vue';
+import Deployments from '@/views/Deployments.vue';
 import Auth from '@/components/Auth.vue'
 
 export default {
@@ -51,7 +52,8 @@ export default {
     LLMConstellation,
     LLMs,
     Chat,
-    Auth
+    Auth,
+    Deployments
   },
   methods: {
     changeTab(index) {
