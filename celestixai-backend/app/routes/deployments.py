@@ -5,7 +5,14 @@ from app.core.auth import get_current_user
 from app.models.models import Model
 from app.core.config import OLLAMA_SERVER_URL, FILE_STORAGE_PATH
 import httpx  # for making HTTP requests
-from uuid import uuid4
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Response
+from fastapi.responses import JSONResponse
+from app.core.config import OLLAMA_SERVER_URL
+from app.services.pull_models import pull_model
+from ollama import Client
+
+client = Client(host=OLLAMA_SERVER_URL)
+
 
 router = APIRouter(
     prefix="/deploy",
@@ -47,3 +54,15 @@ async def create_model(
     model.deploy = True
     db.commit()
     return {"message": "Deployment successful"}
+
+
+@router.post("/pull-model")
+async def pull_model_route(model_name: str, response: Response, background_tasks: BackgroundTasks):
+    try:
+        response.headers["Content-Type"] = "application/json"
+        background_tasks.add_task(pull_model, model_name)
+        return {"message": f"Pulling model {model_name} in the background"}
+    except FileNotFoundError as exc:
+        return JSONResponse(status_code=404, content={"message": str(exc)})
+    except HTTPException as exc:
+        return JSONResponse(status_code=exc.status_code, content={"message": exc.detail})
