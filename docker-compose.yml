@@ -33,7 +33,7 @@ services:
       - backend_network
 
   ollama:
-    image: ollama/ollama
+    image: ollama/ollama:0.1.29
     ports:
       - "11434:11434"
     volumes:
