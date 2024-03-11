@@ -30,6 +30,7 @@ class ModelsRead(BaseModel):
     icon_uuid: str
     icon_filename: str
     custom_name: str
+    ollama_name: str
     filename: str
     parameters: str
     model_class: str

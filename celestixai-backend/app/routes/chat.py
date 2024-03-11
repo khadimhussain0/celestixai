@@ -22,6 +22,7 @@ router = APIRouter(
     tags=["Chat"]
 )
 
+
 @router.post("/", response_model=AssistantChatMessage)
 def chat(
     form_data: ChatRequest,
@@ -62,13 +63,13 @@ def chat(
 
         if rag:
             rag_chat_instance = RAGChat(OllamaEmbeddings(base_url=OLLAMA_SERVER_URL, model="nomic-embed-text"),
-                                        Ollama(base_url=OLLAMA_SERVER_URL, model="mistral:7b-instruct-v0.2-q6_K"))
+                                        Ollama(base_url=OLLAMA_SERVER_URL, model=models_metadata.ollama_name))
             model_response, docs = rag_chat_instance.ask_question(query=form_data.messages[0].content, 
                                                             qdrant_url=QDRANT_SERVER_URL,
                                                             collection_name=str(current_user.id))
             model_response = {"message":{"content": model_response}}
         else:
-            model_response = client.chat(model="mistral:7b-instruct-v0.2-q6_K", messages=modified_messages)
+            model_response = client.chat(model=models_metadata.ollama_name, messages=modified_messages)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
@@ -101,13 +102,13 @@ def chat(
 
         if rag:
             rag_chat_instance = RAGChat(OllamaEmbeddings(base_url=OLLAMA_SERVER_URL, model="nomic-embed-text"),
-                                        Ollama(base_url=OLLAMA_SERVER_URL, model="mistral:7b-instruct-v0.2-q6_K"))
+                                        Ollama(base_url=OLLAMA_SERVER_URL, model=models_metadata.ollama_name))
             model_response, docs = rag_chat_instance.ask_question(query=form_data.messages[0].content, 
                                                             qdrant_url=QDRANT_SERVER_URL,
                                                             collection_name=str(current_user.id))
             model_response = {"message":{"content": model_response}}
         else:
-            model_response = client.chat(model="mistral:7b-instruct-v0.2-q6_K", messages=modified_messages)
+            model_response = client.chat(model=models_metadata.ollama_name, messages=modified_messages)
 
         assistant_message = AssistantChatMessage(
             chat_id=chat.id,
@@ -124,6 +125,7 @@ def chat(
         print("Took (s): ", time.time()-start)
         return assistant_message
 
+
 def preprocess_messages(messages, models_metadata):
     modified_messages = []
     for message in messages:
@@ -137,6 +139,7 @@ def preprocess_messages(messages, models_metadata):
             modified_message.pop("images")
         modified_messages.append(modified_message)
     return modified_messages
+
 
 @router.get("/", response_model=List[ChatResponse])
 def get_chats(
