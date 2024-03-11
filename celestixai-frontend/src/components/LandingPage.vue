@@ -3,12 +3,12 @@
     <!-- Header Section -->
     <header>
       <nav>
-        <div class="logo">Celestixai</div>
+        <div class="logo">celestixai</div>
         <ul>
           <li><a href="#features">Features</a></li>
           <li><a href="#how-it-works">How it Works</a></li>
           <li><a href="#benefits">Benefits</a></li>
-          <li><a href="#pricing">Pricing</a></li>
+          <!-- <li><a href="#pricing">Pricing</a></li> -->
           <li><a href="#contact">Contact</a></li>
         </ul>
       </nav>
@@ -18,7 +18,7 @@
     <section class="hero">
       <div class="hero-content">
         <h1>Unlock the Power of AI for Your Business</h1>
-        <p>Revolutionize your data with LLM AI - Your Gateway to Intelligent Decision Making.</p>
+        <p>Revolutionize your data with celestixai - Your Gateway to Intelligent Decision Making.</p>
         <router-link to="/auth" class="cta-button">Get Started</router-link>
       </div>
     </section>
@@ -31,11 +31,11 @@
         <p>Fine-tune your data effortlessly with our sophisticated LLama model, achieving unparalleled accuracy in AI predictions.</p>
       </div>
 
-      <div class="feature-card">
+      <!-- <div class="feature-card">
         <img src="../assets/falcon-model.png" alt="Falcon Model">
         <h2>Falcon Model</h2>
         <p>Unleash the potential of the Falcon model for cutting-edge AI capabilities, propelling your business into the future of technology.</p>
-      </div>
+      </div> -->
 
       <div class="feature-card">
         <img src="../assets/mixtral-mistral-model.png" alt="Mixtral and Mistral Models">
@@ -74,7 +74,7 @@
 
     <!-- Benefits Section -->
     <section id="benefits" class="benefits">
-      <h2>Benefits of LLM AI</h2>
+      <h2>Benefits of celestixai</h2>
       <div class="benefit-card">
         <img src="../assets/upload-data.png" alt="Easy to Use">
         <h3>Easy to Use</h3>
@@ -103,7 +103,7 @@
     <!-- Get Started Section -->
     <section id="get-started" class="get-started">
       <h2>Get Started Today</h2>
-      <p>Join the AI revolution and elevate your business to new heights. Sign up now to unleash the full potential of LLM AI.</p>
+      <p>Join the AI revolution and elevate your business to new heights. Sign up now to unleash the full potential of celestixai.</p>
       <router-link to="/auth" class="cta-button">Sign Up Now</router-link>
     </section>
 
