@@ -27,7 +27,7 @@ class RAGChat:
                 )
             retriever = doc_store.as_retriever(search_kwargs={"k": self.target_source_chunks})
         except Exception as e:
-            print(f"Collection '{collection_name}' does not exist. Creating new collection.")
+            print(f"Collection '{collection_name}' does not exist. Skipping RAG")
             retriever = lambda x : "no documents found for context!"
 
         template = """Answer the following question using the provided context. If you can't find the answer, do not pretend you know it, but answer "I don't know":
