@@ -13,7 +13,8 @@ class ModelConstellation(BaseModel):
     model_task: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        protected_namespaces = ()
 
 
 @as_form
@@ -27,7 +28,8 @@ class ModelConstellationCreate(BaseModel):
     is_vision: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        protected_namespaces = ()
 
 
 class ModelConstellationRead(BaseModel):
@@ -43,4 +45,5 @@ class ModelConstellationRead(BaseModel):
     is_vision: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        protected_namespaces = ()

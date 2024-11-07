@@ -5,5 +5,5 @@ from datetime import datetime
 class ModelBase(BaseModel):
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 

@@ -5,7 +5,7 @@ from datetime import datetime
 class ModelBase(BaseModel):
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ModelCreate(ModelBase):
@@ -38,4 +38,4 @@ class ModelsRead(BaseModel):
     is_vision: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True

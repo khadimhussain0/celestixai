@@ -8,7 +8,7 @@ class DatasetBase(BaseModel):
     file_size: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class DatasetCreate(DatasetBase):

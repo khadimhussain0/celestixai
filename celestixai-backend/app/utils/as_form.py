@@ -1,22 +1,22 @@
 import inspect
 from typing import Type
-
 from fastapi import Form
 from pydantic import BaseModel
-from pydantic.fields import ModelField
 
 
 def as_form(cls: Type[BaseModel]):
     new_parameters = []
 
-    for field_name, model_field in cls.__fields__.items():
-        model_field: ModelField  # type: ignore
-
-        new_parameters.append(inspect.Parameter(model_field.alias,
-                                                inspect.Parameter.POSITIONAL_ONLY,
-                                                default=Form(...) if model_field.required else Form(model_field.default),
-                                                annotation=model_field.outer_type_,
-                                                ))
+    for field_name, model_field in cls.model_fields.items():
+        parameter_name = model_field.alias or field_name  # Use field name if alias is None
+        new_parameters.append(
+            inspect.Parameter(
+                parameter_name,
+                inspect.Parameter.POSITIONAL_ONLY,
+                default=Form(...) if model_field.is_required() else Form(model_field.get_default()),
+                annotation=model_field.annotation,
+            )
+        )
 
     async def as_form_func(**data):
         return cls(**data)
