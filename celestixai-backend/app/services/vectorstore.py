@@ -18,7 +18,9 @@ from langchain_community.document_loaders import (
     UnstructuredWordDocumentLoader,
 )
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Qdrant
+from langchain_qdrant import QdrantVectorStore, RetrievalMode
+from qdrant_client import QdrantClient, models
+from qdrant_client.http.exceptions import UnexpectedResponse
 from langchain.docstore.document import Document
 
 
@@ -81,31 +83,60 @@ class DocumentProcessor:
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap)
         texts = text_splitter.split_documents(documents)
         print(f"Split into {len(texts)} chunks of text (max. {self.chunk_size} tokens each)")
-        return texts
+        return documents, texts
 
-    async def process_documents(self, collection_name: str = "vectorstore", ignored_files: List[str] = []) -> None:
-        url = QDRANT_SERVER_URL
-        texts = self._process_documents(ignored_files)
-        print(f"Creating embeddings. May take some minutes...")
-        qdrant = await Qdrant.afrom_documents(
-            texts,
-            self.ollama_embedder,
-            url=url,
-            prefer_grpc=True,
-            collection_name=collection_name,
-        )
+    def process_documents(self, collection_name: str = "vectorstore", ignored_files: List[str] = []) -> None:
+        documents, texts = self._process_documents(ignored_files)
 
-        # query="hello"
-        # found_docs = await qdrant.similarity_search_with_score(query)
-        # document, score = found_docs[0]
-        # print(document.page_content)
-        # print(f"\nScore: {score}")
+        client = QdrantClient(url=QDRANT_SERVER_URL)
+        try:
+            collections = client.get_collection(collection_name)
+            existing_vector_size = collections.config.params.vectors.size
+            print(f"Collection '{collection_name}' already exists with {existing_vector_size} vectors.")
+            if existing_vector_size != 768:
+                print(f"Recreating collection '{collection_name}' with new vector size of 768.")
+                client.delete_collection(collection_name)  # Delete the existing collection with incorrect dimensions
+                client.create_collection(
+                    collection_name=collection_name,
+                    vectors_config=models.VectorParams(size=768, distance=models.Distance.COSINE)
+                )
+        except UnexpectedResponse:
+            print(f"Collection '{collection_name}' does not exist. Creating new collection.")
+            client.create_collection(
+                collection_name=collection_name,
+                vectors_config=models.VectorParams(size=768, distance=models.Distance.COSINE)
+            )
+        vector_store = QdrantVectorStore(
+                        client=client,
+                        collection_name=collection_name,
+                        embedding=self.ollama_embedder,
+                        
+                    )
+
+        vector_store.add_documents(documents=documents)
+        
+        if False:
+            retriever = vector_store.as_retriever(
+                search_type="mmr",
+                search_kwargs={"k": 1, "fetch_k": 2, "lambda_mult": 0.5},
+            )
+
+            query = "hello"
+            try:
+                found_docs = vector_store.similarity_search_with_score(query)
+                if found_docs:
+                    document, score = found_docs[0]
+                    print(document.page_content)
+                    print(f"\nScore: {score}")
+                else:
+                    print("No documents found for the query.")
+            except Exception as e:
+                print(f"Error during similarity search: {e}")
         print("Document Embedding complete!")
 
-
 if __name__ == "__main__":
-    ollama_embedder= OllamaEmbeddings(base_url='http://celestixai-ollama-1:11434', model='nomic-embed-text')
-    files= ["/app/vectorestore/galaxticmart.txt"]
+    ollama_embedder = OllamaEmbeddings(base_url='http://ollama:11434', model='nomic-embed-text')
+    files = ["dataset_storage/0f557ad1-73f4-4785-9dfb-24d6129803bd____Khadim_Hussain_Resume_one_page.pdf"]
     processor = DocumentProcessor(files=files, ollama_embedder=ollama_embedder)
     processor.process_documents()
-    print("embedding done")
+    print("Embedding done")

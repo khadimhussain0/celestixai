@@ -1,7 +1,7 @@
 import time
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Qdrant
-import qdrant_client
+from qdrant_client import QdrantClient
 from langchain_community.llms import Ollama
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -18,21 +18,24 @@ class RAGChat:
 
     def ask_question(self, query, qdrant_url="http://qdrant:6333", collection_name: str = "vectorstore"):
         print(f"Fetching embeddings. May take some minutes...")
-        client = qdrant_client.QdrantClient(qdrant_url, prefer_grpc=True)
-        doc_store = Qdrant(
+        client = QdrantClient(qdrant_url, prefer_grpc=True)
+        try:
+            collections = client.get_collection(collection_name)
+            doc_store = Qdrant(
                     client=client, collection_name=collection_name, 
                     embeddings=self.embeddings,
                 )
-        retriever = doc_store.as_retriever(search_kwargs={"k": self.target_source_chunks})
+            retriever = doc_store.as_retriever(search_kwargs={"k": self.target_source_chunks})
+        except Exception as e:
+            print(f"Collection '{collection_name}' does not exist. Creating new collection.")
+            retriever = lambda x : "no documents found for context!"
 
-        template = """Answer the following question using the provided context.
-                If you can't find the answer, do not pretend you know it, but answer "I don't know":
-        {context}
-
-        Question: {question}
-        """
+        template = """Answer the following question using the provided context. If you can't find the answer, do not pretend you know it, but answer "I don't know":
+                    {context}
+                    Question: {question}
+                    """
         prompt = ChatPromptTemplate.from_template(template)
-        print(prompt)
+
         chain = (
             {"context": retriever, "question": RunnablePassthrough()}
             | prompt
@@ -55,5 +58,5 @@ if __name__=="__main__":
     chat = RAGChat(ollama_embedder=ollama_embedder, ollama=ollama_server)
     chat.ask_question('what is GalacticMart', collection_name="1")
 
-    client = qdrant_client.QdrantClient("http://qdrant:6333", prefer_grpc=True)
+    client = QdrantClient("http://qdrant:6333", prefer_grpc=True)
     print(client.get_collections())
