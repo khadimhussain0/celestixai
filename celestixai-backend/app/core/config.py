@@ -3,7 +3,7 @@ from datetime import timedelta
 
 SECRET_KEY = "supersecritkey"
 ALGORITHM = "HS256"
-TOKEN_EXP = timedelta(days=7)
+TOKEN_EXP = timedelta(minutes=30)
 
 
 LLM_ENGINE_URL = "http://34.32.173.165:11435"
