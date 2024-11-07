@@ -14,7 +14,6 @@ COPY ./requirements.txt .
 
 RUN pip install -r requirements.txt
 RUN pip install "fastapi[all]"
-RUN pip install pydantic==1.10.13
 
 
 COPY . .
