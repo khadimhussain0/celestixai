@@ -33,20 +33,20 @@ services:
       - backend_network
 
   ollama:
-    image: ollama/ollama:0.1.29
+    image: ollama/ollama:0.4.0-rc8
     ports:
       - "11434:11434"
     volumes:
       - ollama:/root/.ollama
     networks:
       - backend_network
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
 
   qdrant:
     image: qdrant/qdrant:latest
